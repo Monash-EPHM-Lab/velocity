@@ -14,6 +14,17 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
+L Heterodyne-rescue:VPP-power #PWR0101
+U 1 1 5DE5A2B7
+P 6050 2250
+F 0 "#PWR0101" H 6050 2100 50  0001 C CNN
+F 1 "VPP" V 6065 2377 50  0000 L CNN
+F 2 "" H 6050 2250 50  0001 C CNN
+F 3 "" H 6050 2250 50  0001 C CNN
+	1    6050 2250
+	0    1    1    0   
+$EndComp
+$Comp
 L Heterodyne-rescue:GND-power #PWR0102
 U 1 1 5DE5A5CA
 P 4150 2550
@@ -25,6 +36,8 @@ F 3 "" H 4150 2550 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 Wire Wire Line
+	6050 2250 5850 2250
+Wire Wire Line
 	4750 2250 4750 2050
 Wire Wire Line
 	4700 2400 4750 2400
@@ -34,7 +47,7 @@ U 1 1 5DE5B5FE
 P 4550 2400
 F 0 "C2" V 4301 2400 50  0000 C CNN
 F 1 "100 nF" V 4390 2400 50  0000 C CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 4588 2250 50  0001 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 4588 2250 50  0001 C CNN
 F 3 "~" H 4550 2400 50  0001 C CNN
 	1    4550 2400
 	0    1    1    0   
@@ -42,12 +55,12 @@ $EndComp
 $Comp
 L Heterodyne-rescue:Speaker_Ultrasound-Device LS2
 U 1 1 5DE5E303
-P 7250 6250
-F 0 "LS2" H 7216 5836 50  0000 C CNN
-F 1 "Emmiter" H 7216 5925 50  0000 C CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 7215 6200 50  0001 C CNN
-F 3 "~" H 7215 6200 50  0001 C CNN
-	1    7250 6250
+P 6800 5300
+F 0 "LS2" H 6766 4886 50  0000 C CNN
+F 1 "Emmiter" H 6766 4975 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 6765 5250 50  0001 C CNN
+F 3 "~" H 6765 5250 50  0001 C CNN
+	1    6800 5300
 	0    -1   1    0   
 $EndComp
 $Comp
@@ -67,7 +80,7 @@ U 1 1 5DE6141E
 P 4450 2050
 F 0 "C1" V 4201 2050 50  0000 C CNN
 F 1 "100 nF" V 4290 2050 50  0000 C CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 4488 1900 50  0001 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 4488 1900 50  0001 C CNN
 F 3 "~" H 4450 2050 50  0001 C CNN
 	1    4450 2050
 	0    1    1    0   
@@ -81,7 +94,7 @@ U 1 1 5DE786A6
 P 7600 2550
 F 0 "R2" V 7396 2550 50  0000 C CNN
 F 1 "3.3 kΩ" V 7485 2550 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 7530 2550 50  0001 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" V 7530 2550 50  0001 C CNN
 F 3 "~" H 7600 2550 50  0001 C CNN
 	1    7600 2550
 	0    1    1    0   
@@ -118,6 +131,28 @@ Wire Wire Line
 	4000 2150 3750 2150
 Wire Wire Line
 	4000 2400 4400 2400
+$Comp
+L Heterodyne-rescue:NE5532-Amplifier_Operational U2
+U 3 1 5DE9ED64
+P 9050 3500
+F 0 "U2" H 9200 3500 50  0000 R CNN
+F 1 "NE5532DR" H 9400 3600 50  0000 R CNN
+F 2 "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" H 9050 3500 50  0001 C CNN
+F 3 "http://www.ti.com/lit/ds/symlink/ne5532.pdf" H 9050 3500 50  0001 C CNN
+	3    9050 3500
+	1    0    0    -1  
+$EndComp
+$Comp
+L Heterodyne-rescue:NE5532-Amplifier_Operational U2
+U 2 1 5DEBD03F
+P 6800 4600
+F 0 "U2" H 6800 4900 50  0000 C CNN
+F 1 "NE5532DR" H 6800 5000 50  0000 C CNN
+F 2 "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" H 6800 4600 50  0001 C CNN
+F 3 "http://www.ti.com/lit/ds/symlink/ne5532.pdf" H 6800 4600 50  0001 C CNN
+	2    6800 4600
+	0    -1   1    0   
+$EndComp
 Wire Wire Line
 	8300 2350 8300 2550
 $Comp
@@ -152,7 +187,7 @@ U 1 1 5DEEB130
 P 7300 2700
 F 0 "C12" H 7415 2745 50  0000 L CNN
 F 1 "330 pF" H 7415 2656 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 7338 2550 50  0001 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 7338 2550 50  0001 C CNN
 F 3 "~" H 7300 2700 50  0001 C CNN
 	1    7300 2700
 	1    0    0    -1  
@@ -163,7 +198,7 @@ U 1 1 5DEEB73A
 P 6450 2550
 F 0 "C9" V 6201 2550 50  0000 C CNN
 F 1 "330 pF" V 6290 2550 50  0000 C CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 6488 2400 50  0001 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 6488 2400 50  0001 C CNN
 F 3 "~" H 6450 2550 50  0001 C CNN
 	1    6450 2550
 	0    1    1    0   
@@ -174,7 +209,7 @@ U 1 1 5DEEBC96
 P 6700 2700
 F 0 "C10" H 6585 2655 50  0000 R CNN
 F 1 "330 pF" H 6585 2744 50  0000 R CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 6738 2550 50  0001 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 6738 2550 50  0001 C CNN
 F 3 "~" H 6700 2700 50  0001 C CNN
 	1    6700 2700
 	-1   0    0    1   
@@ -185,7 +220,7 @@ U 1 1 5DEEC06C
 P 6950 2550
 F 0 "R10" V 6746 2550 50  0000 C CNN
 F 1 "1 kΩ" V 6835 2550 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 6880 2550 50  0001 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" V 6880 2550 50  0001 C CNN
 F 3 "~" H 6950 2550 50  0001 C CNN
 	1    6950 2550
 	0    1    1    0   
@@ -264,7 +299,7 @@ L Heterodyne-rescue:C-Device C13
 U 1 1 5DEF7CB3
 P 9550 2800
 F 0 "C13" V 9301 2800 50  0000 C CNN
-F 1 "3.3 μF" V 9390 2800 50  0000 C CNN
+F 1 "1 μF" V 9390 2800 50  0000 C CNN
 F 2 "Capacitor_SMD:C_0805_2012Metric" H 9588 2650 50  0001 C CNN
 F 3 "~" H 9550 2800 50  0001 C CNN
 	1    9550 2800
@@ -300,20 +335,25 @@ $EndComp
 $Comp
 L Heterodyne-rescue:GND-power #PWR0120
 U 1 1 5DFB3A2A
-P 7350 6050
-F 0 "#PWR0120" H 7350 5800 50  0001 C CNN
-F 1 "GND" V 7355 5923 50  0000 R CNN
-F 2 "" H 7350 6050 50  0001 C CNN
-F 3 "" H 7350 6050 50  0001 C CNN
-	1    7350 6050
+P 6900 5100
+F 0 "#PWR0120" H 6900 4850 50  0001 C CNN
+F 1 "GND" V 6905 4973 50  0000 R CNN
+F 2 "" H 6900 5100 50  0001 C CNN
+F 3 "" H 6900 5100 50  0001 C CNN
+	1    6900 5100
 	-1   0    0    1   
 $EndComp
+Wire Wire Line
+	6900 4300 7000 4300
+Connection ~ 7000 4300
+Wire Wire Line
+	6800 4900 6800 5100
 $Comp
 L Heterodyne-rescue:C-Device C14
 U 1 1 5E02AB84
 P 8650 3500
 F 0 "C14" V 8401 3500 50  0000 C CNN
-F 1 "3.3 μF" V 8490 3500 50  0000 C CNN
+F 1 "1 μF" V 8490 3500 50  0000 C CNN
 F 2 "Capacitor_SMD:C_0805_2012Metric" H 8688 3350 50  0001 C CNN
 F 3 "~" H 8650 3500 50  0001 C CNN
 	1    8650 3500
@@ -338,48 +378,61 @@ F 3 "" H 8950 3800 50  0001 C CNN
 	1    8950 3800
 	1    0    0    -1  
 $EndComp
+Connection ~ 8950 3800
+Wire Wire Line
+	6700 3800 6700 4300
 $Comp
 L Heterodyne-rescue:R-Device R4
 U 1 1 5E282544
-P 7750 5550
-F 0 "R4" V 7954 5550 50  0000 C CNN
-F 1 "12 kΩ" V 7865 5550 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 7680 5550 50  0001 C CNN
-F 3 "~" H 7750 5550 50  0001 C CNN
-	1    7750 5550
+P 7300 4600
+F 0 "R4" V 7504 4600 50  0000 C CNN
+F 1 "39 kΩ" V 7415 4600 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" V 7230 4600 50  0001 C CNN
+F 3 "~" H 7300 4600 50  0001 C CNN
+	1    7300 4600
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	7250 5850 7750 5850
+	6800 4900 7300 4900
 Wire Wire Line
-	7750 5850 7750 5700
+	7300 4900 7300 4750
+Connection ~ 6800 4900
 Wire Wire Line
-	7750 5400 7750 5250
+	7300 4450 7300 4300
+Wire Wire Line
+	7000 4300 7300 4300
 $Comp
 L Heterodyne-rescue:R-Device R3
 U 1 1 5E286294
-P 6400 4800
-F 0 "R3" V 6604 4800 50  0000 C CNN
-F 1 "1 kΩ" V 6515 4800 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 6330 4800 50  0001 C CNN
-F 3 "~" H 6400 4800 50  0001 C CNN
-	1    6400 4800
-	0    -1   -1   0   
+P 7250 3800
+F 0 "R3" V 7454 3800 50  0000 C CNN
+F 1 "1 kΩ" V 7365 3800 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" V 7180 3800 50  0001 C CNN
+F 3 "~" H 7250 3800 50  0001 C CNN
+	1    7250 3800
+	0    1    1    0   
 $EndComp
 Wire Wire Line
-	6550 4800 6650 4800
+	7000 3700 7000 3800
+Wire Wire Line
+	7100 3800 7000 3800
+Connection ~ 7000 3800
+Wire Wire Line
+	7000 3800 7000 4300
 $Comp
 L Heterodyne-rescue:GND-power #PWR0118
 U 1 1 5E28A11D
-P 6250 4800
-F 0 "#PWR0118" H 6250 4550 50  0001 C CNN
-F 1 "GND" H 6255 4629 50  0000 C CNN
-F 2 "" H 6250 4800 50  0001 C CNN
-F 3 "" H 6250 4800 50  0001 C CNN
-	1    6250 4800
-	0    1    1    0   
+P 7400 3800
+F 0 "#PWR0118" H 7400 3550 50  0001 C CNN
+F 1 "GND" H 7405 3629 50  0000 C CNN
+F 2 "" H 7400 3800 50  0001 C CNN
+F 3 "" H 7400 3800 50  0001 C CNN
+	1    7400 3800
+	0    -1   -1   0   
 $EndComp
 Text GLabel 6700 2550 1    50   Input ~ 0
+Driver_Wave
+Text GLabel 6700 3800 1    50   Input ~ 0
 Driver_Wave
 $Comp
 L Device:C C4
@@ -387,7 +440,7 @@ U 1 1 5E387E65
 P 5350 3700
 F 0 "C4" V 5098 3700 50  0000 C CNN
 F 1 "22 nF" V 5189 3700 50  0000 C CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 5388 3550 50  0001 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 5388 3550 50  0001 C CNN
 F 3 "~" H 5350 3700 50  0001 C CNN
 	1    5350 3700
 	0    1    1    0   
@@ -398,7 +451,7 @@ U 1 1 5E38B726
 P 4950 3250
 F 0 "R9" V 5157 3250 50  0000 C CNN
 F 1 "330 Ω" V 5066 3250 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 4880 3250 50  0001 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" V 4880 3250 50  0001 C CNN
 F 3 "~" H 4950 3250 50  0001 C CNN
 	1    4950 3250
 	1    0    0    -1  
@@ -443,23 +496,23 @@ Wire Wire Line
 $Comp
 L Heterodyne-rescue:GND-power #PWR0123
 U 1 1 5E3B45F2
-P 9500 6100
-F 0 "#PWR0123" H 9500 5850 50  0001 C CNN
-F 1 "GND" V 9505 5973 50  0000 R CNN
-F 2 "" H 9500 6100 50  0001 C CNN
-F 3 "" H 9500 6100 50  0001 C CNN
-	1    9500 6100
+P 8450 4950
+F 0 "#PWR0123" H 8450 4700 50  0001 C CNN
+F 1 "GND" V 8455 4823 50  0000 R CNN
+F 2 "" H 8450 4950 50  0001 C CNN
+F 3 "" H 8450 4950 50  0001 C CNN
+	1    8450 4950
 	-1   0    0    1   
 $EndComp
 $Comp
 L Heterodyne-rescue:VPP-power #PWR0124
 U 1 1 5E3B49BA
-P 9600 6100
-F 0 "#PWR0124" H 9600 5950 50  0001 C CNN
-F 1 "VPP" V 9615 6226 50  0000 L CNN
-F 2 "" H 9600 6100 50  0001 C CNN
-F 3 "" H 9600 6100 50  0001 C CNN
-	1    9600 6100
+P 8550 4950
+F 0 "#PWR0124" H 8550 4800 50  0001 C CNN
+F 1 "VPP" V 8565 5076 50  0000 L CNN
+F 2 "" H 8550 4950 50  0001 C CNN
+F 3 "" H 8550 4950 50  0001 C CNN
+	1    8550 4950
 	1    0    0    -1  
 $EndComp
 NoConn ~ 5100 4150
@@ -471,7 +524,7 @@ U 1 1 5E3D33B5
 P 5600 4900
 F 0 "C3" V 5351 4900 50  0000 C CNN
 F 1 "100 nF" V 5440 4900 50  0000 C CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 5638 4750 50  0001 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 5638 4750 50  0001 C CNN
 F 3 "~" H 5600 4900 50  0001 C CNN
 	1    5600 4900
 	-1   0    0    1   
@@ -498,9 +551,9 @@ $Comp
 L Device:R R6
 U 1 1 5E436A94
 P 4850 4050
-F 0 "R6" V 4950 4050 50  0000 R CNN
+F 0 "R6" V 4750 4050 50  0000 R CNN
 F 1 "1 kΩ" V 4850 4150 50  0000 R CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 4780 4050 50  0001 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" V 4780 4050 50  0001 C CNN
 F 3 "~" H 4850 4050 50  0001 C CNN
 	1    4850 4050
 	0    1    1    0   
@@ -508,16 +561,27 @@ $EndComp
 $Comp
 L Device:R R5
 U 1 1 5E436F78
-P 4750 3550
-F 0 "R5" V 4850 3750 50  0000 C CNN
-F 1 "10 kΩ" V 4850 3550 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 4680 3550 50  0001 C CNN
-F 3 "~" H 4750 3550 50  0001 C CNN
-	1    4750 3550
+P 4850 3800
+F 0 "R5" V 4950 3850 50  0000 C CNN
+F 1 "2 kΩ" V 4850 3800 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" V 4780 3800 50  0001 C CNN
+F 3 "~" H 4850 3800 50  0001 C CNN
+	1    4850 3800
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
 	5000 4150 5000 4050
+$Comp
+L Heterodyne-rescue:VPP-power #PWR0103
+U 1 1 5E43C439
+P 4700 3800
+F 0 "#PWR0103" H 4700 3650 50  0001 C CNN
+F 1 "VPP" V 4715 3927 50  0000 L CNN
+F 2 "" H 4700 3800 50  0001 C CNN
+F 3 "" H 4700 3800 50  0001 C CNN
+	1    4700 3800
+	0    -1   -1   0   
+$EndComp
 $Comp
 L Heterodyne-rescue:GND-power #PWR0104
 U 1 1 5E43C850
@@ -550,6 +614,9 @@ Wire Wire Line
 Wire Wire Line
 	5650 3700 5500 3700
 Wire Wire Line
+	5000 3800 5000 4050
+Connection ~ 5000 4050
+Wire Wire Line
 	5200 4150 5200 3700
 Connection ~ 5200 3700
 Wire Wire Line
@@ -563,7 +630,7 @@ U 1 1 5E45C221
 P 5650 3250
 F 0 "R7" V 5857 3250 50  0000 C CNN
 F 1 "330 Ω" V 5766 3250 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 5580 3250 50  0001 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" V 5580 3250 50  0001 C CNN
 F 3 "~" H 5650 3250 50  0001 C CNN
 	1    5650 3250
 	1    0    0    -1  
@@ -574,7 +641,7 @@ U 1 1 5E4382A8
 P 4750 5200
 F 0 "R11" V 4650 5200 50  0000 R CNN
 F 1 "10 kΩ" V 4850 5300 50  0000 R CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 4680 5200 50  0001 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" V 4680 5200 50  0001 C CNN
 F 3 "~" H 4750 5200 50  0001 C CNN
 	1    4750 5200
 	0    1    1    0   
@@ -594,6 +661,17 @@ F 2 "" H 4600 5200 50  0001 C CNN
 F 3 "" H 4600 5200 50  0001 C CNN
 	1    4600 5200
 	0    -1   -1   0   
+$EndComp
+$Comp
+L MCU_Microchip_ATmega:ATmega328PB-AU U5
+U 1 1 5E452B6B
+P 2200 3650
+F 0 "U5" H 1750 5150 50  0000 C CNN
+F 1 "ATmega328PB-AU" H 2750 5100 50  0000 C CNN
+F 2 "Package_QFP:TQFP-32_7x7mm_P0.8mm" H 2200 3650 50  0001 C CIN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/40001906C.pdf" H 2200 3650 50  0001 C CNN
+	1    2200 3650
+	1    0    0    -1  
 $EndComp
 $Comp
 L Heterodyne-rescue:VPP-power #PWR0110
@@ -642,7 +720,7 @@ U 1 1 5E458B8B
 P 3350 2900
 F 0 "C5" H 3500 3050 50  0000 L CNN
 F 1 "18 pF" H 3450 2950 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 3388 2750 50  0001 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 3388 2750 50  0001 C CNN
 F 3 "~" H 3350 2900 50  0001 C CNN
 	1    3350 2900
 	1    0    0    -1  
@@ -653,7 +731,7 @@ U 1 1 5E459327
 P 3650 3300
 F 0 "C6" H 3765 3346 50  0000 L CNN
 F 1 "18 pF" H 3765 3255 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 3688 3150 50  0001 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 3688 3150 50  0001 C CNN
 F 3 "~" H 3650 3300 50  0001 C CNN
 	1    3650 3300
 	1    0    0    -1  
@@ -689,14 +767,14 @@ F 3 "" H 3350 2750 50  0001 C CNN
 	-1   0    0    1   
 $EndComp
 Wire Notes Line
-	8950 5500 11000 5500
+	8050 4350 10100 4350
 Wire Notes Line
-	11000 5500 11000 6400
+	10100 4350 10100 5250
 Wire Notes Line
-	11000 6400 8950 6400
+	10100 5250 8050 5250
 Wire Notes Line
-	8950 6400 8950 5500
-Text Notes 8950 5450 0    50   ~ 0
+	8050 5250 8050 4350
+Text Notes 8050 4300 0    50   ~ 0
 OUTPUTS
 $Comp
 L Device:R R8
@@ -704,7 +782,7 @@ U 1 1 5E46438F
 P 3250 3950
 F 0 "R8" V 3043 3950 50  0000 C CNN
 F 1 "10 kΩ" V 3134 3950 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 3180 3950 50  0001 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" V 3180 3950 50  0001 C CNN
 F 3 "~" H 3250 3950 50  0001 C CNN
 	1    3250 3950
 	0    1    1    0   
@@ -736,25 +814,38 @@ Text GLabel 2800 2550 2    50   Input ~ 0
 VOPAMP
 Text GLabel 3050 3950 1    50   Input ~ 0
 TTL_RST
-Text GLabel 9400 6100 1    50   Input ~ 0
+Text GLabel 8350 4950 1    50   Input ~ 0
 TTL_RST
-Text GLabel 9300 6100 1    50   Input ~ 0
+Text GLabel 8250 4950 1    50   Input ~ 0
 TTL_RX
-Text GLabel 9200 6100 1    50   Input ~ 0
+Text GLabel 8150 4950 1    50   Input ~ 0
 TTL_TX
 $Comp
 L Heterodyne-rescue:R-Device R1
 U 1 1 5E285F20
-P 6650 4650
-F 0 "R1" V 6854 4650 50  0000 C CNN
-F 1 "1 kΩ" V 6765 4650 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 6580 4650 50  0001 C CNN
-F 3 "~" H 6650 4650 50  0001 C CNN
-	1    6650 4650
+P 7000 3550
+F 0 "R1" V 7204 3550 50  0000 C CNN
+F 1 "1 kΩ" V 7115 3550 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" V 6930 3550 50  0001 C CNN
+F 3 "~" H 7000 3550 50  0001 C CNN
+	1    7000 3550
 	1    0    0    -1  
 $EndComp
-Text GLabel 6650 4500 1    50   Input ~ 0
+Text GLabel 7000 3400 1    50   Input ~ 0
 VOPAMP
+$Comp
+L Connector_Generic:Conn_01x05 J1
+U 1 1 5E4B4FBE
+P 8350 5150
+F 0 "J1" V 8222 5430 50  0000 L CNN
+F 1 "Conn_01x05" V 8313 5430 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical" H 8350 5150 50  0001 C CNN
+F 3 "~" H 8350 5150 50  0001 C CNN
+	1    8350 5150
+	0    1    1    0   
+$EndComp
+Text Notes 2350 1450 0    50   ~ 0
+OPTIMISATION IDEA: USE ARDUINO TO GENERATE 1MHz WAVE
 $Comp
 L Heterodyne-rescue:VPP-power #PWR0105
 U 1 1 5E51A727
@@ -827,228 +918,4 @@ F 3 "~" H 1250 3150 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 NoConn ~ 1600 2450
-Text GLabel 2800 3350 2    50   Input ~ 0
-VREF
-Text GLabel 4600 3550 0    50   Input ~ 0
-VREF
-$Comp
-L Connector_Generic:Conn_01x06 J1
-U 1 1 5E9822C7
-P 9400 6300
-F 0 "J1" V 9272 6580 50  0000 L CNN
-F 1 "Conn_01x06" V 9363 6580 50  0000 L CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" H 9400 6300 50  0001 C CNN
-F 3 "~" H 9400 6300 50  0001 C CNN
-	1    9400 6300
-	0    1    1    0   
-$EndComp
-Text GLabel 2800 4350 2    50   Input ~ 0
-TLL_WAKE
-$Comp
-L MCU_Microchip_ATmega:ATmega328PB-AU U5
-U 1 1 5E452B6B
-P 2200 3650
-F 0 "U5" H 1750 5150 50  0000 C CNN
-F 1 "ATmega328PB-AU" H 2750 5100 50  0000 C CNN
-F 2 "Package_QFP:TQFP-32_7x7mm_P0.8mm" H 2200 3650 50  0001 C CIN
-F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/40001906C.pdf" H 2200 3650 50  0001 C CNN
-	1    2200 3650
-	1    0    0    -1  
-$EndComp
-Text GLabel 9100 6100 1    50   Input ~ 0
-TLL_WAKE
-$Comp
-L Heterodyne-rescue:C-Device C7
-U 1 1 5E989C6F
-P 4850 3900
-F 0 "C7" V 4600 3850 50  0000 C CNN
-F 1 "100 nF" V 4700 3800 50  0000 C CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 4888 3750 50  0001 C CNN
-F 3 "~" H 4850 3900 50  0001 C CNN
-	1    4850 3900
-	0    1    1    0   
-$EndComp
-$Comp
-L Heterodyne-rescue:GND-power #PWR01
-U 1 1 5E9905FE
-P 4700 3900
-F 0 "#PWR01" H 4700 3650 50  0001 C CNN
-F 1 "GND" V 4705 3773 50  0000 R CNN
-F 2 "" H 4700 3900 50  0001 C CNN
-F 3 "" H 4700 3900 50  0001 C CNN
-	1    4700 3900
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	5000 4050 5000 3900
-Connection ~ 5000 4050
-Wire Wire Line
-	4900 3750 5000 3750
-Wire Wire Line
-	5000 3750 5000 3900
-Connection ~ 5000 3900
-Wire Wire Line
-	4900 3550 4900 3750
-Wire Wire Line
-	7000 3600 7000 3500
-Wire Wire Line
-	7000 3500 7150 3500
-Wire Wire Line
-	7150 3500 7150 4300
-Wire Wire Line
-	7150 4300 6900 4300
-Wire Wire Line
-	6900 4300 6900 4200
-Text GLabel 6800 3600 1    50   Input ~ 0
-Driver_Wave
-Wire Wire Line
-	7150 4400 7150 4300
-Connection ~ 7150 4300
-$Comp
-L Device:C C8
-U 1 1 5ED8BA3C
-P 7150 4550
-F 0 "C8" H 7265 4596 50  0000 L CNN
-F 1 "1 nF" H 7265 4505 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 7188 4400 50  0001 C CNN
-F 3 "~" H 7150 4550 50  0001 C CNN
-	1    7150 4550
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	7150 4700 7150 4800
-Wire Wire Line
-	7350 5250 7750 5250
-Connection ~ 6650 4800
-Wire Wire Line
-	6650 4800 7150 4800
-Connection ~ 7150 4800
-Wire Wire Line
-	7150 4800 7150 5250
-Connection ~ 7250 5850
-$Comp
-L Heterodyne-rescue:NE5532-Amplifier_Operational U2
-U 1 1 5DEBD03F
-P 7250 5550
-F 0 "U2" H 7250 5850 50  0000 C CNN
-F 1 "OPA2830" H 7250 5950 50  0000 C CNN
-F 2 "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" H 7250 5550 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/sbos309d/sbos309d.pdf?ts=1591270339697" H 7250 5550 50  0001 C CNN
-	1    7250 5550
-	0    -1   1    0   
-$EndComp
-$Comp
-L Heterodyne-rescue:R-Device R12
-U 1 1 5ED97019
-P 7750 5100
-F 0 "R12" V 7954 5100 50  0000 C CNN
-F 1 "1 kΩ" V 7865 5100 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 7680 5100 50  0001 C CNN
-F 3 "~" H 7750 5100 50  0001 C CNN
-	1    7750 5100
-	1    0    0    -1  
-$EndComp
-Connection ~ 7750 5250
-$Comp
-L Device:C C15
-U 1 1 5ED9732D
-P 7750 4800
-F 0 "C15" H 7865 4846 50  0000 L CNN
-F 1 "1 nF" H 7865 4755 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 7788 4650 50  0001 C CNN
-F 3 "~" H 7750 4800 50  0001 C CNN
-	1    7750 4800
-	1    0    0    -1  
-$EndComp
-$Comp
-L Heterodyne-rescue:GND-power #PWR0103
-U 1 1 5ED97CB6
-P 7750 4650
-F 0 "#PWR0103" H 7750 4400 50  0001 C CNN
-F 1 "GND" V 7755 4523 50  0000 R CNN
-F 2 "" H 7750 4650 50  0001 C CNN
-F 3 "" H 7750 4650 50  0001 C CNN
-	1    7750 4650
-	-1   0    0    1   
-$EndComp
-$Comp
-L Heterodyne-rescue:VPP-power #PWR0101
-U 1 1 5DE5A2B7
-P 5900 1800
-F 0 "#PWR0101" H 5900 1650 50  0001 C CNN
-F 1 "VPP" V 5915 1927 50  0000 L CNN
-F 2 "" H 5900 1800 50  0001 C CNN
-F 3 "" H 5900 1800 50  0001 C CNN
-	1    5900 1800
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Heterodyne-rescue:NE5532-Amplifier_Operational U2
-U 2 1 5EDA12AF
-P 6900 3900
-F 0 "U2" H 6900 4200 50  0000 C CNN
-F 1 "OPA2830" H 6900 4300 50  0000 C CNN
-F 2 "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" H 6900 3900 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/sbos309d/sbos309d.pdf?ts=1591270339697" H 6900 3900 50  0001 C CNN
-	2    6900 3900
-	0    -1   1    0   
-$EndComp
-$Comp
-L Heterodyne-rescue:NE5532-Amplifier_Operational U2
-U 3 1 5EDA317D
-P 8850 3500
-F 0 "U2" H 8550 3450 50  0000 C CNN
-F 1 "OPA2830" H 8450 3550 50  0000 C CNN
-F 2 "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" H 8850 3500 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/sbos309d/sbos309d.pdf?ts=1591270339697" H 8850 3500 50  0001 C CNN
-	3    8850 3500
-	-1   0    0    -1  
-$EndComp
-Connection ~ 8950 3800
-Wire Wire Line
-	7250 5850 7250 6050
-Text GLabel 2800 3450 2    50   Input ~ 0
-VHET
-Text GLabel 6300 1800 2    50   Input ~ 0
-VHET
-$Comp
-L Jumper:SolderJumper_3_Open JP1
-U 1 1 5EFD5DCC
-P 6100 1800
-F 0 "JP1" H 6100 2005 50  0000 C CNN
-F 1 "SolderJumper_3_Open" H 6100 1914 50  0000 C CNN
-F 2 "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm_NumberLabels" H 6100 1800 50  0001 C CNN
-F 3 "~" H 6100 1800 50  0001 C CNN
-	1    6100 1800
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	6100 1950 6100 2200
-Wire Wire Line
-	5850 2250 6100 2250
-$Comp
-L Heterodyne-rescue:C-Device C16
-U 1 1 5EFDDB64
-P 6250 2200
-F 0 "C16" V 6001 2200 50  0000 C CNN
-F 1 "3.3 μF" V 6090 2200 50  0000 C CNN
-F 2 "Capacitor_SMD:C_0805_2012Metric" H 6288 2050 50  0001 C CNN
-F 3 "~" H 6250 2200 50  0001 C CNN
-	1    6250 2200
-	0    1    1    0   
-$EndComp
-Connection ~ 6100 2200
-Wire Wire Line
-	6100 2200 6100 2250
-$Comp
-L power:GND #PWR02
-U 1 1 5EFDEB74
-P 6400 2200
-F 0 "#PWR02" H 6400 1950 50  0001 C CNN
-F 1 "GND" V 6405 2072 50  0000 R CNN
-F 2 "" H 6400 2200 50  0001 C CNN
-F 3 "" H 6400 2200 50  0001 C CNN
-	1    6400 2200
-	0    -1   -1   0   
-$EndComp
 $EndSCHEMATC

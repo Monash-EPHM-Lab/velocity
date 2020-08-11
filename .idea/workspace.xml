@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="336e6fa0-5b09-4d55-8ced-f3447e91e7c1" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/FFTLib/arduinoFFT/src/arduinoFFT.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFTLib/arduinoFFT/src/arduinoFFT.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFTLib/arduinoFFT/src/defs.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFTLib/arduinoFFT/src/types.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFTLib/src/arduinoFFTfix.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFTLib/src/arduinoFFTfix.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFTLib/src/defsfix.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFTLib/src/typesfix.h" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectId" id="1az8h7ON8vrmdHiy88gHqImtvQc" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="E:/SRAM_FFT" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="336e6fa0-5b09-4d55-8ced-f3447e91e7c1" name="Default Changelist" comment="" />
+      <created>1587727177622</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1587727177622</updated>
+      <workItem from="1587727179078" duration="490000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="800" y="509" key="FileChooserDialogImpl" timestamp="1587727668703">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="800" y="509" key="FileChooserDialogImpl/0.0.2560.1400@0.0.2560.1400" timestamp="1587727668703" />
+  </component>
+</project>

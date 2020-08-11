@@ -1,3 +1,0 @@
-(sym_lib_table
-  (lib (name Interconnect-rescue)(type Legacy)(uri ${KIPRJMOD}/Interconnect-rescue.lib)(options "")(descr ""))
-)
