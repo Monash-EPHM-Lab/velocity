@@ -38,8 +38,8 @@ fig, ax = plt.subplots()
 
 
 
-# for _ in range(30):
-        # pt = random.choice(points)
+# for _ in range(8600,9500,2):
+        # pt = points[_]
 
         # if pt.get_fft()[0] == None:
                # continue
@@ -54,7 +54,7 @@ fig, ax = plt.subplots()
         # plfft = pt.get_fft()
         # # # plfft[0] = 0
         # # #plfft[1] = 0
-        # pldfft = [val/weight for (val,weight) in zip(plfft, psd_air_8)]
+        # pldfft = [val/weight for (val,weight) in zip(plfft, psd_wtr)]
         # # pldfft = gf(pldfft, sigma = 1)
         
         # #dfft = pt.canny()
@@ -72,12 +72,14 @@ fig, ax = plt.subplots()
         # #ax.vlines(vem, 0 , 1E12, colors = "g")
         # ax.vlines(alvem, 0 , 1E12, colors = "r")
        
-        # ax.add_patch(patches.Rectangle((0,0), 2*SdPoint.binconv , 1E12, facecolor="#ed092040"))
+        # #ax.add_patch(patches.Rectangle((0,0), 5*SdPoint.binconv , 1E12, facecolor="#ed092040"))
+        # ax.add_patch(patches.Rectangle((0,0), 4000 , 8000, facecolor="#ed092040"))
         # #ax.add_patch(patches.Rectangle((vem - ves,0), 2*ves , 1E12, facecolor="#e8a40540"))
         # ax.add_patch(patches.Rectangle((alvem - alves,0), 2*alves , 1E12, facecolor="#34eb7440"))
-        # ax.set_xlim(0,128*SdPoint.binconv)
-        # ax.set_ylim(0,2000000)
+        # ax.set_xlim(0,32*SdPoint.binconv)
+        # ax.set_ylim(0,250000)
 
+        # ax.set_title(pt.get_time())
         # ax.set_xlabel("Velocity (mm/s)")
         # ax.set_ylabel("Amplitude")
         # # plt.show()
@@ -86,7 +88,7 @@ fig, ax = plt.subplots()
 
         # plt.cla()
 
-# for i in range(0,100,1):
+#for i in range(0,100,1):
 tv = [x.get_time() for x in points]
 hv = [x.get_hach_vel() for x in points]
 bv = [x.get_vemc() for x in points]      
@@ -101,15 +103,16 @@ powr = [.3*np.mean(powr) if x > .3*np.mean(powr) else x for x in powr]
 
 
 #ax.scatter(tv,bv, c = '#348feb', s = 8)
-ax.scatter(tv,av, c=powr, cmap="Blues", s = 8)
 
-ax.scatter(tv,hv, c = '#f0952640', s = 8)
-dstart = datetime(2020,7,31)
-dend = datetime(2020,8,6)
-ax.set_xlim(dstart,dend)
+# ax.scatter(tv,av, c=powr, cmap="Blues", s = 8)
 
-#ax.plot([0,2000],[0,2000], c = 'r' )
-#ax.scatter(hv,av, c=powr, cmap="Blues", s = 8)
+# ax.scatter(tv,hv, c = '#f0952640', s = 8)
+# dstart = datetime(2020,7,27)
+# dend = datetime(2020,9,3)
+# ax.set_xlim(dstart,dend)
+
+ax.plot([0,2000],[0,2000], c = 'r' )
+ax.scatter(hv,av, c=powr, cmap="Blues", s = 8)
 
 
 

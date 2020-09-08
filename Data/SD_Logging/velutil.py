@@ -27,7 +27,7 @@ class SdPoint:
                 self.time = datetime(1, 1, 1)
                 self.scale = 0
                 self.hach_vel = 0
-                self.thrsh = 8000
+                self.thrsh = 12000#8000
                 self.ctlow = -2000
                 self.cthigh = -800
 
@@ -238,6 +238,10 @@ class SdPoint:
             return self.algoATM(fftpsd)
         
         def algoATM(self, fft = None):
+            indx_low = 4
+            indx_high = 64
+            threshold = self.thrsh
+        
             if fft is None:
                 fft = self.fft
 
@@ -245,11 +249,15 @@ class SdPoint:
                return 0, 0
             #find max bin
             
-            ampmax = max(fft[2:64])
+            ampmax = max(fft[indx_low:indx_high])
             
             max_bin = fft.index(ampmax)
-
-            threshold = self.thrsh
+            
+            if (max_bin < 8):
+                upmax = max(fft[8:16])
+                if (upmax > threshold):
+                    ampmax = upmax
+                    max_bin = fft.index(ampmax)
 
             #set theshold
             ##fft = [x - self.thrsh for x in fft]
@@ -285,9 +293,9 @@ class SdPoint:
 
             #find mean and stdev
             try:
-                vea = sum(fft[2:64])
-                mean_indx = np.average(list(range(2,64)), weights = fft[2:64])
-                std_indx = math.sqrt(np.average((list(range(2,64))-mean_indx)**2, weights=fft[2:64]))
+                vea = sum(fft[indx_low:indx_high])
+                mean_indx = np.average(list(range(indx_low,indx_high)), weights = fft[indx_low:indx_high])
+                std_indx = math.sqrt(np.average((list(range(indx_low,indx_high))-mean_indx)**2, weights=fft[indx_low:indx_high]))
             except ZeroDivisionError:
                 mean_indx = 0
                 std_indx = 0
