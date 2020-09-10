@@ -38,7 +38,7 @@ fig, ax = plt.subplots()
 
 
 
-# for _ in range(8600,9500,2):
+# for _ in range(10000,14000,10):
         # pt = points[_]
 
         # if pt.get_fft()[0] == None:
@@ -56,6 +56,8 @@ fig, ax = plt.subplots()
         # # #plfft[1] = 0
         # pldfft = [val/weight for (val,weight) in zip(plfft, psd_wtr)]
         # # pldfft = gf(pldfft, sigma = 1)
+        # pldfft = gf(pldfft, sigma = 1)
+        # pldfft = [x for x in pldfft]
         
         # #dfft = pt.canny()
        
@@ -104,15 +106,18 @@ powr = [.3*np.mean(powr) if x > .3*np.mean(powr) else x for x in powr]
 
 #ax.scatter(tv,bv, c = '#348feb', s = 8)
 
-# ax.scatter(tv,av, c=powr, cmap="Blues", s = 8)
 
-# ax.scatter(tv,hv, c = '#f0952640', s = 8)
-# dstart = datetime(2020,7,27)
-# dend = datetime(2020,9,3)
-# ax.set_xlim(dstart,dend)
 
-ax.plot([0,2000],[0,2000], c = 'r' )
-ax.scatter(hv,av, c=powr, cmap="Blues", s = 8)
+
+ax.scatter(tv,av, c=powr, cmap="Blues", s = 8)
+
+ax.scatter(tv,hv, c = '#f0952640', s = 8)
+dstart = datetime(2020,7,27)
+dend = datetime(2020,9,9)
+ax.set_xlim(dstart,dend)
+
+# ax.plot([0,2000],[0,2000], c = 'r' )
+# ax.scatter(hv,av, c=powr, cmap="Blues", s = 8)
 
 
 

@@ -1,5 +1,5 @@
 /*
-BoSL Velocity Firmware rev: 0.1.1
+BoSL Velocity Firmware rev: 0.1.2
 */
 
 //FFT library
@@ -8,13 +8,10 @@ BoSL Velocity Firmware rev: 0.1.1
 #include <LowPower.h>
 
 #define SCAN 8
-#define DEBUG 1
-#define MAXTHRESHOLD 70
-#define CANNYTHRESHOLD -2000
+#define THRESHOLD 8000
 #define SAMPLES 256
 #define ADCADR 0x34
 #define INTPIN 2
-
 
 ////arrays and constants 
 const float calArray[5] PROGMEM = {1, 9.72, 19.7, 35.7, 69.7}; //fft bin to frequency (Hz)
@@ -23,14 +20,16 @@ const float convgd[5] PROGMEM = {-0.242, -0.3449, 0, 0.3449, 0.242}; //convlutio
 #if SCAN != 8
 	#error PSD will be wrong if scans is not 8, need to change psd.
 #endif
-const float psd[128] PROGMEM = {0.0434, 0.1302, 0.3614, 0.5516, 0.7673, 1.0930, 1.2842, 1.4360, 1.7642, 2.1021, 2.2257, 2.1246, 2.2491, 2.3856, 2.2418, 1.9725,
-								1.7545, 1.7474, 2.0761, 2.4401, 1.9419, 1.5914, 1.6817, 2.0773, 2.2819, 2.5188, 2.7833, 2.9392, 2.7098, 2.7949, 3.0510, 3.3100, 
-								3.2085, 3.3210, 3.3978, 3.3780, 3.2344, 3.1959, 3.2777, 3.4199, 3.3442, 3.3688, 3.1197, 3.2555, 3.2136, 3.0687, 2.9642, 2.7663, 
-								2.3861, 2.1492, 2.1230,	2.2483, 2.3645, 2.5430, 2.5027, 2.6091, 2.6616, 2.6996, 2.8795, 2.8860, 2.9746, 3.0419, 3.1340, 3.1399,
-								3.2030, 3.3240, 3.2957, 3.3536, 3.4545, 3.5697, 3.5310, 3.5416, 3.6472, 3.6616, 3.6112, 3.6202, 3.6655, 3.6874, 3.6856, 3.7181,
-								3.7431, 3.6836, 3.5221, 3.5640, 3.5330, 3.4858, 3.6022, 3.5891, 3.6414, 3.6996, 3.7098, 3.7616, 3.6117, 3.6612, 3.7405, 3.7618,
-								3.7321, 3.8477, 3.8426, 3.7889, 3.5972, 3.6667,	3.7568, 3.7154, 3.7625, 3.9065, 3.8923, 3.7489, 3.7727, 3.8224, 3.8191, 3.8335, 
-								3.7039, 3.8566, 3.8530, 3.7970, 3.8846, 3.8159, 3.8710,	3.8742, 3.8441, 3.8637, 3.8246, 3.8172, 3.7997, 3.8871, 3.7802, 3.6647};
+
+//this psd has been normalised to have a sum of 128 and then the reciprocal was taken to optimise division 
+const float psd[128] PROGMEM = {0.0486, 0.0515, 0.1005, 0.1684, 0.2097, 0.2548, 0.2918, 0.2941,
+								0.7019, 0.7564, 0.7914, 0.8685, 1.0031, 1.1231, 1.1873, 1.3456,
+								2.4325, 2.6274, 2.7041, 2.7515, 2.8640, 2.8970, 2.8848, 2.8773,
+								2.7438, 2.6662, 2.6206, 2.4676, 2.2633, 2.4108, 2.7908, 3.1709,
+								3.8374, 3.8902, 3.9454, 3.9505, 4.0462, 4.1509, 4.1788, 4.2397,
+								3.1874, 3.0327, 2.6496, 2.8251, 3.2223, 3.6684, 3.8046, 3.7911,
+								4.2095, 4.3283, 4.4344, 4.4344, 4.4511, 4.5481, 4.4713, 4.4890,
+								4.5578, 4.7484, 4.6178, 4.5849, 4.5438, 4.7071, 4.7038, 4.6925};
 
 
 //FFT sample buffers
@@ -42,10 +41,12 @@ float convstack[3];
 float rangeScaler;
 
 
-float vem; //faling edge velocity
+float vem; //velocity measurement mean
 float ves; //velocity standard deviation
 float vea; //velocity amplitude score
 
+
+bool debug = 0;
 //Define FFT object
 arduinoFFTfix FFTfix = arduinoFFTfix();
 
@@ -65,7 +66,7 @@ void doFFT(void){
 		
 }
 
-void getVel(int velMulti, int scans, bool plot = 0, bool canny = 0) {
+void getVel(int velMulti, int scans, bool plot = 0) {
   
 	rangeScaler = 0;
 	
@@ -95,8 +96,7 @@ void getVel(int velMulti, int scans, bool plot = 0, bool canny = 0) {
     delDCcomp();
 
 	doFFT();
-
-
+   
 	for(int i = 0; i<SAMPLES/2; i++){
 		float temp = (((float)read[i])/(((float)rangeScaler)*4.0));
 		acc[i] += temp*temp;
@@ -112,17 +112,14 @@ void getVel(int velMulti, int scans, bool plot = 0, bool canny = 0) {
    if(plot){
 	   plotFFT();
    }
-   if(DEBUG){
-	   // plotFFT();
-	   // Serial.println();
-	   printFFT();
+   if(debug){
+	    plotFFT();
+	    Serial.println();
+	   //printFFT();
    }
-   
-   if (canny){
-   cannyPeak(velMulti);
-   }else{
+
    maxPeak(velMulti);
-   }
+   
 // returns in vem, ves, vea
 }
 
@@ -142,16 +139,10 @@ void loop() {
     cmd = Serial.read();
 
 	if (cmd == 'V') {
-      getFFT(0,0);
+      getFFT(0);
     }
 	if (cmd == 'F') {
-      getFFT(1,0);
-    }
-	if (cmd == 'B') {
-      getFFT(0,1);
-    }
-	if (cmd == 'C') {
-      getFFT(1,1);
+      getFFT(1);
     }
 	if (cmd == 'D') {
       printRes();
@@ -162,11 +153,17 @@ void loop() {
 	if (cmd == 'I') {
       getInf();
     }
+	
+	//debug mode
+	if (cmd == 'B') {
+	  debug = 1;
+      while(1){
+	  getFFT(0);
+	  }
+    }
 
   }
-  if(DEBUG){
-	getFFT(0,0);  
-  }
+
 
 }
 
@@ -184,7 +181,7 @@ void printRes(){
 	Serial.print("T");
 }
 
-void getFFT(bool fft, bool canny){
+void getFFT(bool fft){
 	pinMode(3, OUTPUT);
 	pinMode(9, OUTPUT);
 	pinMode(A0, OUTPUT);
@@ -198,11 +195,11 @@ void getFFT(bool fft, bool canny){
 	I2c.setSpeed(1); //Note 200 kHz Bus Speed
 	
 	if(fft){
-		 getVel(4, SCAN, 1, canny);	
+		 getVel(4, SCAN, 1);	
 	}else{
-		 getVel(4, SCAN, 0, canny);
+		 getVel(4, SCAN, 0);
 		 
-		if(not DEBUG){
+		if(not debug){
 			printRes();
 		}
 	}
@@ -227,7 +224,9 @@ void maxPeak(int velMulti){
 	//whiten noise
 	whiten();
 	
-	for (int i = 2; i < (SAMPLES / 4); i++)
+	
+	//find maximum bin and maximum value
+	for (int i = 3; i < (SAMPLES / 4); i++)
     {
       if (acc[i] > vea) {
         vea = acc[i];
@@ -235,9 +234,23 @@ void maxPeak(int velMulti){
       }
 
     }
-
-    for (int i = 2; i < (SAMPLES / 4); i++) {
-      if (acc[i] < MAXTHRESHOLD) {
+	
+	//this find a peak outside the low noise range if present
+	//maybe this is a bad idea, should be safe to comment out if so
+	if (max_bin < 8){
+		float max_val = THRESHOLD;
+		for (int i = 8; i < 16; i++)
+		{
+		if (acc[i] > max_val) {
+			max_val = acc[i];
+			max_bin = i;
+			vea = max_val;
+		}
+		}
+	}
+	
+    for (int i = 3; i < (SAMPLES / 4); i++) {
+      if (acc[i] < THRESHOLD) {
         acc[i] = 0;
       }
 
@@ -264,7 +277,7 @@ void maxPeak(int velMulti){
 
 	float norm = 0;
 
-    for (int i = 2; i < (SAMPLES / 4) ; i++) {
+    for (int i = 3; i < (SAMPLES / 4) ; i++) {
       vem += (float)acc[i] * (float)i;
       norm += (float)acc[i];
     }
@@ -272,7 +285,7 @@ void maxPeak(int velMulti){
     vem = vem / norm;
 
 
-    for (int i = 2; i < (SAMPLES / 4); i++) {
+    for (int i = 3; i < (SAMPLES / 4); i++) {
       ves += ((float)(i - vem))*((float)(i - vem))*((float)acc[i]);
     }
 	
@@ -286,89 +299,6 @@ void maxPeak(int velMulti){
 
 }
 
-void cannyPeak(int velMulti){
-	int max_bin = 0;
-	
-	vem = 0;
-    ves = 0;
-	vea = 0;	
-	
-	//whiten noise
-	whiten();
-	
-	//convolve FFT
-	doConv();
-	
-	//find first peak
-	for (int i = SAMPLES/4; i >= 0; i--){
-		if (acc[i] < MAXTHRESHOLD){
-			if (acc[i] < getAcc(i-1)){
-			max_bin = i;
-			break;
-			}
-		}
-	}
-	//store amplitude
-	vea = acc[max_bin];
-	
-	float nonmaxThresh = vea*0.3;
-	
-	
-	for (int i = 0; i < (SAMPLES / 4); i++) {
-      if (acc[i] > nonmaxThresh) {
-        acc[i] = 0;
-      }
-
-    }
-
-    bool notPeak = 0;
-	
-	//isolate peak from left and right sides
-    for (int i = max_bin; i < (SAMPLES / 4); i++) {
-      if (acc[i] == 0) {
-        notPeak = 1;
-      }
-      if (notPeak) {
-        acc[i] = 0;
-      }
-    }
-	
-    notPeak = 0;
-    for (int i = max_bin; i > 0; i--) {
-      if (acc[i] == 0) {
-        notPeak = 1;
-      }
-      if (notPeak) {
-        acc[i] = 0;
-      }
-    }
-	
-	
-    float norm = 0;
-	vem = 0;
-	//find vem by average
-    for (int i = 2; i < (SAMPLES / 4) ; i++) {
-      vem += (float)acc[i] * (float)i;
-      norm += (float)acc[i];
-    }
-
-    vem = vem / norm;
-
-	//stdev
-	ves = 0;
-
-    for (int i = 2; i < (SAMPLES / 4); i++) {
-      ves += ((float)(i - vem))*((float)(i - vem))*((float)acc[i]);
-    }
-	
-	ves = sqrt(ves / norm);
-
-
-    //converts frequency to mm/s
-    ves = (ves) * (calArray[velMulti])*0.75  /(SAMPLES / 128);
-    vem = (vem) * (calArray[velMulti])*0.75  /(SAMPLES / 128); 
-	
-}
 
 void doConv(){
 	stackSet();
@@ -399,7 +329,7 @@ void setAcc(int idx, float val){
 }
 
 void whiten(){
-	for(int i = 0; i < SAMPLES/4  + 5; i++){ //+5 is for future convolution purposes, should be removed later
+	for(int i = 0; i < SAMPLES/4 ; i++){ //+5  for future convolution purposes, should be removed later
 		acc[i] = acc[i]*pgm_read_float_near(&psd[i]);
 	}	
 }
@@ -526,7 +456,7 @@ void delDCcomp() {
 
 void getInf(){
 	Serial.println(F("ID: 00x"));
-	Serial.println(F("Firmware rev: 0.1.1"));
+	Serial.println(F("Firmware rev: 0.1.2"));
 	Serial.println(F("Hardware rev: 0.1.3"));
 }
 
