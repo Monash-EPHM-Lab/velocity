@@ -13,6 +13,7 @@ points = []
 #print(psd_wtr)
 
 load_data(points)
+#load_test(points)
 
 
 fig, ax = plt.subplots()
@@ -93,7 +94,9 @@ fig, ax = plt.subplots()
 #for i in range(0,100,1):
 tv = [x.get_time() for x in points]
 hv = [x.get_hach_vel() for x in points]
-bv = [x.get_vemc() for x in points]      
+bv = [x.get_vem() for x in points]    
+bsv = [x.get_ves() for x in points]  
+bav = [x.get_vea() for x in points]      
 tvd = [x.algoM() for x in points]
 av = [x[0] for x in tvd]
 sv = [x[1] for x in tvd]
@@ -101,23 +104,27 @@ powr = [x[2] for x in tvd]
 
 
 #sv = [np.mean(sv) if x > np.mean(sv) else x for x in sv]
-powr = [.3*np.mean(powr) if x > .3*np.mean(powr) else x for x in powr]   
+powr = [2*np.mean(powr) if x > 2*np.mean(powr) else x for x in powr]   
+
+# for a,b in zip(av,bv):
+    # print(a)
+    # print(b)
+    # input()
+
+# ax.scatter(powr,bav, c = '#348feb', s = 8)
 
 
-#ax.scatter(tv,bv, c = '#348feb', s = 8)
 
 
+# ax.scatter(tv,av, c=powr, cmap="Blues", s = 8)
 
+# ax.scatter(tv,hv, c = '#f0952640', s = 8)
+# dstart = datetime(2020,8,27)
+# dend = datetime(2020,9,16)
+# ax.set_xlim(dstart,dend)
 
-ax.scatter(tv,av, c=powr, cmap="Blues", s = 8)
-
-ax.scatter(tv,hv, c = '#f0952640', s = 8)
-dstart = datetime(2020,7,27)
-dend = datetime(2020,9,9)
-ax.set_xlim(dstart,dend)
-
-# ax.plot([0,2000],[0,2000], c = 'r' )
-# ax.scatter(hv,av, c=powr, cmap="Blues", s = 8)
+ax.plot([0,2000],[0,2000], c = 'r' )
+ax.scatter(hv,av, c=powr, cmap="Blues", s = 8)
 
 
 

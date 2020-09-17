@@ -19,10 +19,8 @@ psd_air_8 = [x/(sum(psd_air_raw_8)/len(psd_air_raw_8)) for x in psd_air_raw_8]
 
 for i in range (8):
     for j in range(16):
-        print("{:.4f}".format(psd_wtr[8*i+j]**-1),end = ', ')
+        print("{:.4f}".format(psd_wtr[16*i+j]**-1),end = ', ')
     print()
-
-
 
 
 
@@ -36,10 +34,11 @@ class SdPoint:
                 self.idv = None
                 self.vem = 0
                 self.ves = 0
+                self.vea = 0
                 self.time = datetime(1, 1, 1)
                 self.scale = 0
                 self.hach_vel = 0
-                self.thrsh = 24000#8000
+                self.thrsh = 8000
                 self.ctlow = -2000
                 self.cthigh = -800
 
@@ -70,6 +69,10 @@ class SdPoint:
                 return self.ves * SdPoint.coslos
         def set_ves (self, ves):
                 self.ves = ves
+        def get_vea (self):
+                return self.vea
+        def set_vea (self, vea):
+                self.vea = vea
         def get_time (self):
                 return self.time
         def set_time (self, time):
@@ -244,8 +247,7 @@ class SdPoint:
             fftpsd = [binn/weight for binn,weight in zip(fftpsd, psd_wtr)]
             # fftpsd = gf(fftpsd, sigma = .3)
             fftpsd = [x for x in fftpsd]
-            
-            
+
             
             return self.algoATM(fftpsd)
         
@@ -264,6 +266,7 @@ class SdPoint:
             ampmax = max(fft[indx_low:indx_high])
             
             max_bin = fft.index(ampmax)
+
             
             if (max_bin < 8):
                 upmax = max(fft[8:16])
@@ -313,6 +316,7 @@ class SdPoint:
                 std_indx = 0
             mean_indx *= SdPoint.binconv
             std_indx *= SdPoint.binconv
+                       
             return mean_indx, std_indx, vea
 
         def algo(self):
@@ -505,4 +509,32 @@ def load_data(points):
                                 
         points += point_bach                        
                                 
+    return points
+
+
+
+def load_test(points):
+    with open('FFT.csv', newline='') as csvfile:
+                spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+                for i,row in enumerate(spamreader):
+                            
+                        try:
+                                idsd = float(row[0])
+                                vemsd = float(row[136])
+                                vessd = float(row[137])
+                                veasd = float(row[138])
+                        except IndexError:
+                                continue
+                        
+                        point = SdPoint()
+                        
+                        point.set_vem(vemsd)
+                        point.set_ves(vessd)
+                        point.set_vea(veasd)
+
+                        for j in range(128):
+                                point.set_fft(float(row[j+3]),j)
+                        point.set_scale(float(row[132]))
+                        
+                        points.append(point)
     return points
