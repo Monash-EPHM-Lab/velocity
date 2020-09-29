@@ -94,6 +94,7 @@ fig, ax = plt.subplots()
 #for i in range(0,100,1):
 tv = [x.get_time() for x in points]
 hv = [x.get_hach_vel() for x in points]
+dv = [1000*x.get_hach_depth() for x in points]
 bv = [x.get_vem() for x in points]    
 bsv = [x.get_ves() for x in points]  
 bav = [x.get_vea() for x in points]      
@@ -104,7 +105,7 @@ powr = [x[2] for x in tvd]
 
 
 #sv = [np.mean(sv) if x > np.mean(sv) else x for x in sv]
-powr = [2*np.mean(powr) if x > 2*np.mean(powr) else x for x in powr]   
+powr = [20*np.mean(powr) if x > 20*np.mean(powr) else x for x in powr]   
 
 # for a,b in zip(av,bv):
     # print(a)
@@ -119,12 +120,13 @@ powr = [2*np.mean(powr) if x > 2*np.mean(powr) else x for x in powr]
 # ax.scatter(tv,av, c=powr, cmap="Blues", s = 8)
 
 # ax.scatter(tv,hv, c = '#f0952640', s = 8)
+# ax.scatter(tv,dv, c = '#5802e340', s = 8)
 # dstart = datetime(2020,8,27)
-# dend = datetime(2020,9,16)
+# dend = datetime(2020,9,27)
 # ax.set_xlim(dstart,dend)
 
-ax.plot([0,2000],[0,2000], c = 'r' )
-ax.scatter(hv,av, c=powr, cmap="Blues", s = 8)
+#ax.plot([0,2000],[0,2000], c = 'r' )
+ax.scatter(dv,av, c=powr, cmap="Blues", s = 8)
 
 
 

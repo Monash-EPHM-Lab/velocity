@@ -3,12 +3,13 @@
 #include <avr/power.h>
 #include <SoftwareSerial.h>
 #include <LowPower.h>
-
+#include <SPI.h>
+#include <SD.h>
 
 #define SIMCOM_7000 // SIM7000A/C/E/G
 #define BAUDRATE 9600 // MUST be below 19200 (for stability) but 9600 is more stable
 
-#define CHARBUFF 196 //SIM7000 serial response buffer //longer than 255 will cause issues
+#define CHARBUFF 128 //SIM7000 serial response buffer //longer than 255 will cause issues
 #define MAXTRASMITINTERVAL 60000//milli seconds
 
 // For SIM7000 BoSL board
@@ -16,12 +17,12 @@
 #define DTR 5 // Connect with solder jumper
 #define BOSL_RX 3 // Microcontroller RX
 #define BOSL_TX 2 // Microcontroller TX
-#define VEL_RX 8
-#define VEL_TX 9
+#define VEL_RX 9
+#define VEL_TX 8
 #define VEL_RST 7
 
 //Site specific config
-#define SITEID "VELOCITY_TEST_10K_TEST"
+#define SITEID "VELOCITY_ID008"
 //does not do anything atm // change values in transmit function
 //#define APN "telstra.internet" //FOR TELSTRA
 //#define APN "mdata.net.au" //FOR ALDI MOBILE
@@ -45,16 +46,20 @@ char air[2];
 char Nview[2];
 char CBC[5];
 //previous GPS reponse strings
-char Lstvel[80];
+
 char Lstpress[2];
 char LstEC[2];
 char Lstair[2];
 char LstNview[2];
 
+char ok[3] = {'O', 'K', '\0'};
+
 //SIM7000 serial object
 SoftwareSerial simCom = SoftwareSerial(BOSL_RX, BOSL_TX);
 SoftwareSerial velPort = SoftwareSerial(VEL_RX, VEL_TX);
 
+ uint32_t logid = 0;
+File root; 
  
 ////clears char arrays////
 void charBuffclr(bool clrVars[6] = defaultVars){
@@ -80,9 +85,7 @@ void charBuffclr(bool clrVars[6] = defaultVars){
 
 ////clears char arrays////
 void LstcharBuffclr(bool clrVars[6] = defaultVars){
-    if(clrVars[0]){
-    memset(Lstvel, '\0', 80);
-    }
+
     if(clrVars[1]){
     memset(Lstpress, '\0', 2);
     }
@@ -101,11 +104,7 @@ void LstcharBuffclr(bool clrVars[6] = defaultVars){
 void charBuffAdvance(bool advVars[6] = defaultVars){
     uint8_t i;
     
-    if(advVars[0]){
-        for(i = 0; i < 80; i++){
-            Lstvel[i] = vel[i];
-        }
-    }
+
     if(advVars[1]){
         for(i = 0; i < 2; i++){
             Lstpress[i] = press[i];
@@ -193,15 +192,19 @@ void setup() {
   charBuffclr();
   LstcharBuffclr();
   
+  if (!SD.begin(10)) {
+    Serial.println(F("SD FAIL"));
+  }
+  
   //ensure sim is in the off state
   simOff();
   
   //begin serial
-  Serial.begin(BAUDRATE);
+  Serial.begin(115200);
   simCom.begin(BAUDRATE);
   simCom.listen();
 
-  Serial.println("Initialising SIM 7000");
+  Serial.println(F("Initialising SIM 7000"));
   //initialise sim (on arduino startup only)
 	// simOn();
     // simInit();
@@ -221,7 +224,7 @@ void loop() {
 	  
       charBuffclr();
       digitalWrite(6,HIGH);
-      Serial.println("VEL");
+      Serial.println(F("VEL"));
 	  
       velread();
 	  
@@ -245,7 +248,7 @@ void loop() {
       }
     
   
-    Serial.println("Sleep");
+    Serial.println(F("Sleep"));
 	Serial.println();
 		//delay(15000);
 	Sleepy(60);
@@ -257,13 +260,15 @@ void velread(){
 	uint8_t i = 0;
 	
 
+	logid++;
+
 	pinMode(VEL_RST, OUTPUT);
 	digitalWrite(VEL_RST, LOW);
 	delay(10);
 	digitalWrite(VEL_RST, HIGH);
 	pinMode(VEL_RST, INPUT);
 
-	velPort.begin(9600);
+	velPort.begin(4800);
 	velPort.listen();
 	
 	tout = millis(); 
@@ -271,35 +276,81 @@ void velread(){
         if(velPort.available() != 0){ 
 			bytin = velPort.read();
 			if(bytin == 'R'){
-
+				Serial.println('R');
 				break;
 			}
 		}
 	}	
 	
 	
-	velPort.print('V');
-	
+	root = SD.open(F("log.csv"), FILE_WRITE);
+	Serial.println(F("Write"));
+    if (root) {
+		velPort.print('F');
+	    root.print(logid);
+		root.print(',');
+		root.print(',');
 	tout = millis();
-	while((millis()- tout < 10000) and (i<80)){
+	while(millis()- tout < 10000){
 		if(velPort.available() != 0){
            
 		   bytin = velPort.read();
-		   if(bytin == ' '){
-			continue;
-           }
-		   vel[i] = bytin;
-            
-            // check if the desired answer is in the response of the module
-            if (vel[i] == 'T')    
+		   
+		    if((bytin == 20) or (bytin == '\r') or (bytin == '\n')){
+				continue;
+			}
+            if (bytin == 'T')    
             {
-                vel[i] = '\0';
 				break;
             }
-			i++;
-        } 
+		    root.print(bytin);
+			//Serial.print(bytin);
+        } 	
 		
 	 }
+	 root.print(',');
+	 root.print(',');
+	
+    Serial.println();
+	delay(100);
+	velPort.print('D');
+		
+		tout = millis();
+		while((millis()- tout < 10000) and (i<80)){
+			if(velPort.available() != 0){
+			   
+			   bytin = velPort.read();
+			   if(bytin == ' '){
+				continue;
+			   }
+			   if((bytin == 20) or (bytin == '\r') or (bytin == '\n')){
+				continue;
+			}
+
+			   
+			   
+			   vel[i] = bytin;
+				// check if the desired answer is in the response of the module
+				if (vel[i] == 'T')    
+				{
+					vel[i] = '\0';
+					break;
+				}
+				
+				root.print(bytin);
+				
+				i++;
+			} 
+			
+		 }
+
+		root.println();
+		root.close();
+	}else {
+
+    Serial.println(F("error writing to SD"));
+	
+    }
 
 	velPort.print('S');
 	velPort.flush();
@@ -338,7 +389,7 @@ void Sleepy(uint16_t tsleep){ //Sleep Time in seconds
 ////TRANSMITS LAST GPS CORDINATES TO WEB////
 void Transmit(){
     
-    dataStr = "AT+HTTPPARA=\"URL\",\"www.bosl.com.au/IoT/testing/scripts/WriteMe.php?SiteName=";
+    dataStr = F("AT+HTTPPARA=\"URL\",\"www.bosl.com.au/IoT/testing/scripts/WriteMe.php?SiteName=");
     
     dataStr += SITEID;
     dataStr += ".csv&T=";
@@ -352,33 +403,33 @@ void Transmit(){
     
     ///***check logic
    //set CSTT - if it is already set, then no need to do again...
-        sendATcmd(F("AT+CSTT?"), "OK",1000);   
+        sendATcmd(F("AT+CSTT?"), ok,1000);   
         if (strstr(response, "mdata.net.au") != NULL){
             //this means the cstt has been set, so no need to set again!
             Serial.println("CSTT already set to APN ...no need to set again");
        } else {
-            sendATcmd(F("AT+CSTT=\"mdata.net.au\""), "OK",1000);
+            sendATcmd(F("AT+CSTT=\"mdata.net.au\""), ok,1000);
         }
     
     
     //close open bearer
-    sendATcmd(F("AT+SAPBR=2,1"), "OK",1000);
+    sendATcmd(F("AT+SAPBR=2,1"), ok,1000);
     if (strstr(response, "1,1") == NULL){
         if (strstr(response, "1,3") == NULL){
-        sendATcmd(F("AT+SAPBR=0,1"), "OK",1000);
+        sendATcmd(F("AT+SAPBR=0,1"), ok,1000);
         }
-        sendATcmd(F("AT+SAPBR=1,1"), "OK",1000);
+        sendATcmd(F("AT+SAPBR=1,1"), ok,1000);
     }
     
-    sendATcmd(F("AT+HTTPINIT"), "OK",1000);
-    sendATcmd(F("AT+HTTPPARA=\"CID\",1"), "OK",1000);
+    sendATcmd(F("AT+HTTPINIT"), ok,1000);
+    sendATcmd(F("AT+HTTPPARA=\"CID\",1"), ok,1000);
    
-    sendATcmd(dataStr, "OK",1000);
+    sendATcmd(dataStr, ok,1000);
    
    sendATcmd(F("AT+HTTPACTION=0"), "200",2000);
-    sendATcmd(F("AT+HTTPTERM"), "OK",1000);
+    sendATcmd(F("AT+HTTPTERM"), ok,1000);
   //close the bearer connection
-    sendATcmd(F("AT+SAPBR=0,1"), "OK",1000);
+    sendATcmd(F("AT+SAPBR=0,1"), ok,1000);
     
     netUnreg();
     
@@ -401,18 +452,18 @@ bool shouldTrasmit(){
 
 ////power down cellular functionality////
 void netUnreg(){
-    sendATcmd(F("AT+CFUN=0"), "OK", 1000);
+    sendATcmd(F("AT+CFUN=0"), ok, 1000);
 }
 
 ////register to network////
 void netReg(){
-    sendATcmd(F("AT+CFUN=0"), "OK", 1000);
+    sendATcmd(F("AT+CFUN=0"), ok, 1000);
     
     if(sendATcmd(F("AT+CFUN=1"), "+CPIN: READY", 1000) == 0){
-        sendATcmd(F("AT+CFUN=6"), "OK", 10000);
+        sendATcmd(F("AT+CFUN=6"), ok, 10000);
         xDelay(10000);
         
-        sendATcmd(F("AT+CFUN=1"), "OK", 1000);
+        sendATcmd(F("AT+CFUN=1"), ok, 1000);
     }
     xDelay(2000);
     sendATcmd(F("AT+CREG?"), "+CREG: 0,1", 2000);
@@ -481,11 +532,11 @@ bool sendATcmd(String ATcommand, char* expctAns, unsigned int timeout){
 ////initialises sim on arduino startup////
 void simInit(){
    
-      sendATcmd(F("AT+IPR=9600"),"OK",1000);
+      sendATcmd(F("AT+IPR=9600"),ok,1000);
       
-      sendATcmd(F("ATE0"),"OK",1000);
+      sendATcmd(F("ATE0"),ok,1000);
       
-      sendATcmd(F("AT&W0"),"OK",1000);
+      sendATcmd(F("AT&W0"),ok,1000);
   
 }
 
@@ -525,7 +576,7 @@ void simOff() {
 
 void CBCread(){
     //get GNSS data
-    if (sendATcmd(F("AT+CBC"), "OK",1000)){
+    if (sendATcmd(F("AT+CBC"), ok,1000)){
         
         storeCBCresponse();
         

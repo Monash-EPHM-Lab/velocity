@@ -38,6 +38,7 @@ class SdPoint:
                 self.time = datetime(1, 1, 1)
                 self.scale = 0
                 self.hach_vel = 0
+                self.hach_depth = 0
                 self.thrsh = 8000
                 self.ctlow = -2000
                 self.cthigh = -800
@@ -85,6 +86,10 @@ class SdPoint:
                 return self.hach_vel
         def set_hach_vel (self, vel):
                 self.hach_vel = vel
+        def get_hach_depth(self):
+                return self.hach_depth
+        def set_hach_depth(self, depth):
+                self.hach_depth = depth
         
         def collect(self, plist):
             
@@ -462,6 +467,7 @@ def load_data(points):
 
                 
                         point.set_hach_vel(hach_vel[hi])
+                        point.set_hach_depth(hach_depth[hi])
                 except IndexError:
                                 break
 
