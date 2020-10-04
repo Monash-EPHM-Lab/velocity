@@ -92,6 +92,8 @@ fig, ax = plt.subplots()
         # plt.cla()
 
 #for i in range(0,100,1):
+points = [pt for pt in points if pt.algoM()[0] != 0]
+
 tv = [x.get_time() for x in points]
 hv = [x.get_hach_vel() for x in points]
 dv = [1000*x.get_hach_depth() for x in points]
@@ -104,33 +106,46 @@ sv = [x[1] for x in tvd]
 powr = [x[2] for x in tvd]
 
 
-#sv = [np.mean(sv) if x > np.mean(sv) else x for x in sv]
-powr = [20*np.mean(powr) if x > 20*np.mean(powr) else x for x in powr]   
+def slog(x):
+    try:
+        r = math.log(x)
+    except ValueError:
+        r = 0
+    return r
 
-# for a,b in zip(av,bv):
-    # print(a)
-    # print(b)
-    # input()
-
-# ax.scatter(powr,bav, c = '#348feb', s = 8)
-
-
-
-
-# ax.scatter(tv,av, c=powr, cmap="Blues", s = 8)
-
-# ax.scatter(tv,hv, c = '#f0952640', s = 8)
-# ax.scatter(tv,dv, c = '#5802e340', s = 8)
-# dstart = datetime(2020,8,27)
-# dend = datetime(2020,9,27)
-# ax.set_xlim(dstart,dend)
-
-#ax.plot([0,2000],[0,2000], c = 'r' )
-ax.scatter(dv,av, c=powr, cmap="Blues", s = 8)
+# #sv = [np.mean(sv) if x > np.mean(sv) else x for x in sv]
+# powr = [np.mean(powr) if x > np.mean(powr) else x for x in powr]   
+powr = [-slog(x) for x in powr]   
 
 
+# batches
+# # for a,b in zip(av,bv):
+    # # print(a)
+    # # print(b)
+    # # input()
 
-# plt.savefig('out\\' + str(i) + '.png', dpi = 300)
+# # ax.scatter(powr,bav, c = '#348feb', s = 8)
+
+
+###################################this clips some data
+ax.set_ylim([0,1500])
+
+ax.scatter(tv,av, c=powr, cmap="inferno", s = 4)
+
+ax.scatter(tv,hv, c = '#5802e340', s = 4)
+dstart = datetime(2020,8,27)
+dend = datetime(2020,9,22)
+ax.set_xlim(dstart,dend)
+
+#ax.set_xlim([0,2000])
+
+
+
+ax.set_ylabel('Velocity (mm/s)')
+ax.set_xlabel('Date')
+
+
+plt.savefig('time.png', dpi = 600)
 # plt.cla()
                    
 
