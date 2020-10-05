@@ -134,7 +134,7 @@ ax.scatter(tv,av, c=powr, cmap="inferno", s = 4)
 
 ax.scatter(tv,hv, c = '#5802e340', s = 4)
 dstart = datetime(2020,8,27)
-dend = datetime(2020,9,22)
+dend = datetime(2020,9,30)
 ax.set_xlim(dstart,dend)
 
 #ax.set_xlim([0,2000])
@@ -145,7 +145,7 @@ ax.set_ylabel('Velocity (mm/s)')
 ax.set_xlabel('Date')
 
 
-plt.savefig('time.png', dpi = 600)
+#plt.savefig('time.png', dpi = 600)
 # plt.cla()
                    
 
