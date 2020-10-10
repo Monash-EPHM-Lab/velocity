@@ -9,7 +9,6 @@ from velutil import *
 
 points = []
 
-
 #print(psd_wtr)
 
 load_data(points)
@@ -92,7 +91,8 @@ fig, ax = plt.subplots()
         # plt.cla()
 
 #for i in range(0,100,1):
-points = [pt for pt in points if pt.algoM()[0] != 0]
+# points = [pt for pt in points if pt.algoM()[0] != 0]
+points = [pt for pt in points if pt.algoM()[0] > 300]
 
 tv = [x.get_time() for x in points]
 hv = [x.get_hach_vel() for x in points]
@@ -106,6 +106,18 @@ sv = [x[1] for x in tvd]
 powr = [x[2] for x in tvd]
 
 
+def intime(x,ds,de):
+    
+    if x > ds:
+        if x < de:
+            return 1
+    return 0
+    
+
+ct = [x for x in tv if intime(x,datetime(2020,9,18),datetime(2020,9,19))]
+print(len(ct))
+
+
 def slog(x):
     try:
         r = math.log(x)
@@ -114,7 +126,7 @@ def slog(x):
     return r
 
 # #sv = [np.mean(sv) if x > np.mean(sv) else x for x in sv]
-# powr = [np.mean(powr) if x > np.mean(powr) else x for x in powr]   
+ 
 powr = [-slog(x) for x in powr]   
 
 
@@ -130,22 +142,26 @@ powr = [-slog(x) for x in powr]
 ###################################this clips some data
 ax.set_ylim([0,1500])
 
-ax.scatter(tv,av, c=powr, cmap="inferno", s = 4)
+ax.scatter(tv,av, c=powr, cmap="inferno", s = 1)
 
-ax.scatter(tv,hv, c = '#5802e340', s = 4)
-dstart = datetime(2020,8,27)
-dend = datetime(2020,9,30)
+ax2 = ax.twinx()
+#ax.scatter(tv,hv, c = '#5802e340', s = 1)
+ax2.scatter(tv,dv, c = '#5802e340', s = 1)
+ax2.set_ylim([0,3000])
+dstart = datetime(2020,7,30)
+dend = datetime(2020,9,29)
 ax.set_xlim(dstart,dend)
-
+fig.autofmt_xdate()
 #ax.set_xlim([0,2000])
 
 
 
 ax.set_ylabel('Velocity (mm/s)')
+ax2.set_ylabel('Depth (mm)')
 ax.set_xlabel('Date')
 
 
-#plt.savefig('time.png', dpi = 600)
+plt.savefig('time_depth.png', dpi = 600)
 # plt.cla()
                    
 

@@ -329,7 +329,7 @@ class SdPoint:
             # fftpsd[0] = 0
             # fftpsd[1] = 0
             fftpsd = [binn/weight for binn,weight in zip(fftpsd, psd_wtr)]
-            fftpsd = np.convolve(fftpsd, np.ones((8,))/8, mode='same')
+            #fftpsd = np.convolve(fftpsd, np.ones((8,))/8, mode='same')
             fftpsd = [x for x in fftpsd]
 
             
@@ -478,18 +478,23 @@ class SdPoint:
 
 def load_data(points):
 
+    device = '000'
+    sp_st = 3
+
     hach_date = []
     hach_depth = []
     hach_vel = []
     
     
-    hach_files = ['data8/hach/' + f for f in listdir('data8/hach') if isfile(join('data8/hach', f))]
-    log_files = ['data8/log/' + f for f in listdir('data8/log') if isfile(join('data8/log', f))]
-    sd_files = ['data8/sd/' + f for f in listdir('data8/sd') if isfile(join('data8/sd', f))]\
+    hach_files = ['data/hach/' + f for f in listdir('data/hach') if isfile(join('data/hach', f))]
+    log_files = ['data/log_' + device + '/' + f for f in listdir('data/log_' + device) if isfile(join('data/log_' + device, f))]
+    sd_files = ['data/sd_'  + device + '/' + f for f in listdir('data/sd_' + device) if isfile(join('data/sd_' + device, f))]\
     
-    # hach_files = hach_files[0:1]
-    # log_files = log_files[0:1]
-    # sd_files = sd_files[0:1]
+    hach_files = hach_files[sp_st:4]#9
+    log_files = log_files[sp_st:]
+    sd_files = sd_files[sp_st:]
+    
+    print([x for x in zip(hach_files, log_files, sd_files)])
     
     for hach_f,log_f,sd_f in zip(hach_files, log_files, sd_files):
         point_bach = []
@@ -508,13 +513,16 @@ def load_data(points):
                 spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
                 for i,row in enumerate(spamreader):
 
-                        point_bach.append(SdPoint())
-                        
-                        point_bach[i].set_time(datetime.strptime(row[0], '%d/%m/%y %I:%M:%S %p')+timedelta(hours=10))
-                        point_bach[i].set_id(float(row[1]))
-                        point_bach[i].set_vem(float(row[7])) 
-                        point_bach[i].set_ves(float(row[8])) 
-
+                        try:
+                            point_bach.append(SdPoint())
+                            
+                            point_bach[i].set_time(datetime.strptime(row[0], '%d/%m/%y %I:%M:%S %p')+timedelta(hours=10))
+                            point_bach[i].set_id(float(row[1]))
+                            point_bach[i].set_vem(float(row[7])) 
+                            point_bach[i].set_ves(float(row[8]))
+                            point_bach[i].set_vea(float(row[9]))                            
+                        except ValueError:
+                            pass
         hi = 0;
         skip = False
 
@@ -557,21 +565,22 @@ def load_data(points):
                         skip = False
                         continue
 
-
         hi = 0;
         skip = False
         with open(sd_f, newline='') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
                 for i,row in enumerate(spamreader):
-                        try:
-                                idsd = float(row[0])
-                                vemsd = float(row[136])
-                                vessd = float(row[137])
-                        except IndexError:
-                                continue
-                        
+                    try:
+                            idsd = float(row[0])
+                            vemsd = float(row[136])
+                            vessd = float(row[137])
+                    except IndexError:
+                            continue
+                    
+                    try:
                         point = point_bach[hi]
-
+                    
+                    
                         while(point.get_id() < idsd):
                                 hi += 1;
                                 point = point_bach[hi]
@@ -584,19 +593,20 @@ def load_data(points):
                                         hi = 0
                                         skip = True
                                         break;  
-                        
+                    except IndexError:
+                        pass
 
-                        if skip:
-                                skip = False
-                                continue
+                    if skip:
+                            skip = False
+                            continue
 
-                        if (point.match(idsd,vemsd,vessd)):
-                                for j in range(128):
-                                        point.set_fft(float(row[j+3]),j)
-                                point.set_scale(float(row[132]))
+                    if (point.match(idsd,vemsd,vessd)):
+                            for j in range(128):
+                                    point.set_fft(float(row[j+3]),j)
+                            point.set_scale(float(row[132]))
                                 
         points += point_bach                        
-                                
+         
     return points
 
 

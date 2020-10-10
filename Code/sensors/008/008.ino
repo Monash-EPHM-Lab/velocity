@@ -126,7 +126,7 @@ void getVel(int velMulti, int scans, bool plot = 0) {
 
 void setup() {
 
-  Serial.begin(4800);
+  Serial.begin(2400);
   Serial.print('R');
   
 }
@@ -296,7 +296,7 @@ void maxPeak(int velMulti){
     //converts frequency to mm/s
     ves = 1.15*(ves) * (pgm_read_float_near(&calArray[velMulti]))*0.75  /(SAMPLES / 128);
     vem = 1.15*(vem) * (pgm_read_float_near(&calArray[velMulti]))*0.75  /(SAMPLES / 128); 
-	vea = norm/1E5;
+	//vea = norm/1E3; //return vea as peak height
 
 }
 

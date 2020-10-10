@@ -22,7 +22,7 @@
 #define VEL_RST 7
 
 //Site specific config
-#define SITEID "VELOCITY_ID008"
+#define SITEID "VELOCITY_ID008_TEST"
 //does not do anything atm // change values in transmit function
 //#define APN "telstra.internet" //FOR TELSTRA
 //#define APN "mdata.net.au" //FOR ALDI MOBILE
@@ -40,17 +40,12 @@ String dataStr; //Transmit URL
 
 //GPS reponse stings
 char vel[80];
-char press[2];
-char EC[2];
-char air[2];
-char Nview[2];
+
+
 char CBC[5];
 //previous GPS reponse strings
 
-char Lstpress[2];
-char LstEC[2];
-char Lstair[2];
-char LstNview[2];
+
 
 char ok[3] = {'O', 'K', '\0'};
 
@@ -66,18 +61,7 @@ void charBuffclr(bool clrVars[6] = defaultVars){
     if(clrVars[0]){
     memset(vel, '\0', 80);
     }
-    if(clrVars[1]){
-    memset(press, '\0', 2);
-    }
-    if(clrVars[2]){
-    memset(EC, '\0', 2);
-    }
-    if(clrVars[3]){
-    memset(air, '\0', 2);
-    }
-    if(clrVars[4]){
-    memset(Nview, '\0', 2); 
-    }
+    
     if(clrVars[5]){
     memset(CBC, '\0', 5); 
     }
@@ -86,46 +70,13 @@ void charBuffclr(bool clrVars[6] = defaultVars){
 ////clears char arrays////
 void LstcharBuffclr(bool clrVars[6] = defaultVars){
 
-    if(clrVars[1]){
-    memset(Lstpress, '\0', 2);
-    }
-    if(clrVars[2]){
-    memset(LstEC, '\0', 2);
-    }
-    if(clrVars[3]){
-    memset(Lstair, '\0', 2);
-    }
-    if(clrVars[4]){
-    memset(LstNview, '\0', 2);
-    }
+  
 }
 
 ////stores coordinate data as previous and clears current arrays////
 void charBuffAdvance(bool advVars[6] = defaultVars){
     uint8_t i;
-    
-
-    if(advVars[1]){
-        for(i = 0; i < 2; i++){
-            Lstpress[i] = press[i];
-        }
-    }
-    if(advVars[2]){
-        for(i = 0; i < 2; i++){
-            LstEC[i] = EC[i];
-        }
-    }
-    if(advVars[3]){
-        for(i = 0; i < 2; i++){
-            Lstair[i] = air[i];
-        }
-    }
-    if(advVars[4]){
-        for(i = 0; i < 2; i++){
-            LstNview[i] = Nview[i];
-        }
-    }
-   
+       
     bool clrVars[6] = {1,1,1,1,1,0};
     
     charBuffclr(clrVars);
@@ -268,7 +219,7 @@ void velread(){
 	digitalWrite(VEL_RST, HIGH);
 	pinMode(VEL_RST, INPUT);
 
-	velPort.begin(4800);
+	velPort.begin(2400);
 	velPort.listen();
 	
 	tout = millis(); 
@@ -393,15 +344,17 @@ void Transmit(){
     
     dataStr += SITEID;
     dataStr += ".csv&T=";
-    dataStr += CBC;
+	dataStr += logid;
     dataStr += "&V=";
     dataStr += vel;
+	dataStr += "&B=";
+    dataStr += CBC;
     dataStr += "\"";
     
     netReg();
     
     
-    ///***check logic
+    //check logic
    //set CSTT - if it is already set, then no need to do again...
         sendATcmd(F("AT+CSTT?"), ok,1000);   
         if (strstr(response, "mdata.net.au") != NULL){
