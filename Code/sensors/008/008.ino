@@ -1,5 +1,5 @@
 /*
-BoSL Velocity Firmware rev: 0.1.2
+BoSL Velocity Firmware rev: 0.1.3
 PSD Spectrum for hardware ID 008
 */
 

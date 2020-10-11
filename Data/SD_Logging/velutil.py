@@ -19,6 +19,9 @@ psd_wtr = [x/(sum(psd_wtr_raw)/len(psd_wtr_raw)) for x in psd_wtr_raw]
 psd_wtr_8 = [x/(sum(psd_wtr_raw_8)/len(psd_wtr_raw_8)) for x in psd_wtr_raw_8]
 psd_air_8 = [x/(sum(psd_air_raw_8)/len(psd_air_raw_8)) for x in psd_air_raw_8]
 
+
+
+
 # for i in range (8):
     # for j in range(16):
         # print("{:.4f}".format(psd_wtr[16*i+j]**-1),end = ', ')
@@ -490,7 +493,7 @@ def load_data(points):
     log_files = ['data/log_' + device + '/' + f for f in listdir('data/log_' + device) if isfile(join('data/log_' + device, f))]
     sd_files = ['data/sd_'  + device + '/' + f for f in listdir('data/sd_' + device) if isfile(join('data/sd_' + device, f))]\
     
-    hach_files = hach_files[sp_st:4]#9
+    hach_files = hach_files[sp_st:9]#9
     log_files = log_files[sp_st:]
     sd_files = sd_files[sp_st:]
     

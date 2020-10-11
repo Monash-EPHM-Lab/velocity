@@ -91,31 +91,52 @@ fig, ax = plt.subplots()
         # plt.cla()
 
 #for i in range(0,100,1):
-points = [pt for pt in points if pt.algoM()[0] != 0]
-# points = [pt for pt in points if pt.algoM()[0] > 300]
-
-tv = [x.get_time() for x in points]
-hv = [x.get_hach_vel() for x in points]
-dv = [1000*x.get_hach_depth() for x in points]
-bv = [x.get_vem() for x in points]    
-bsv = [x.get_ves() for x in points]  
-bav = [x.get_vea() for x in points]      
-tvd = [x.algoM() for x in points]
-av = [x[0] for x in tvd]
-sv = [x[1] for x in tvd]
-powr = [x[2] for x in tvd]
-
-
 def intime(x,ds,de):
     
     if x > ds:
         if x < de:
             return 1
     return 0
-    
 
-# ct = [x for x in tv if intime(x,datetime(2020,9,18),datetime(2020,9,19))]
-# print(len(ct))
+points = [pt for pt in points if pt.algoM()[0] != 0]
+
+points = [x for x in points if intime(x.get_time(),datetime(2020,9,17),datetime(2020,9,20))]
+
+
+ffts = [x.get_fft() for x in points]
+
+accumulator = [0]*128
+
+def acc(x):
+    a = x[0]
+    v = x[1]
+    
+    a += v*v
+    
+    return a
+
+for fft in ffts:
+    accumulator = [acc(x) for x in zip(accumulator,fft)]
+
+
+
+psd = [math.sqrt(x) for x in accumulator]
+
+# tv = [x.get_time() for x in points]
+# hv = [x.get_hach_vel() for x in points]
+# dv = [1000*x.get_hach_depth() for x in points]
+# bv = [x.get_vem() for x in points]    
+# bsv = [x.get_ves() for x in points]  
+# bav = [x.get_vea() for x in points]      
+# tvd = [x.algoM() for x in points]
+# av = [x[0] for x in tvd]
+# sv = [x[1] for x in tvd]
+# powr = [x[2] for x in tvd]
+
+print(psd)
+ax.plot(psd)
+ax.set_yscale('log')
+
 
 
 def slog(x):
@@ -127,41 +148,39 @@ def slog(x):
 
 # #sv = [np.mean(sv) if x > np.mean(sv) else x for x in sv]
  
-powr = [-slog(x) for x in powr]   
+# powr = [-slog(x) for x in powr]   
 
 
-# batches
-# # for a,b in zip(av,bv):
-    # # print(a)
-    # # print(b)
-    # # input()
+# # batches
+# # # for a,b in zip(av,bv):
+    # # # print(a)
+    # # # print(b)
+    # # # input()
 
-# # ax.scatter(powr,bav, c = '#348feb', s = 8)
-
-
-###################################this clips some data
-ax.set_ylim([0,1500])
-
-ax.scatter(tv,av, c=powr, cmap="inferno", s = 1)
-
-ax2 = ax.twinx()
-ax.scatter(tv,hv, c = '#5802e340', s = 1)
-#ax2.scatter(tv,dv, c = '#5802e340', s = 1)
-ax2.set_ylim([0,3000])
-dstart = datetime(2020,7,30)
-dend = datetime(2020,9,29)
-ax.set_xlim(dstart,dend)
-fig.autofmt_xdate()
-#ax.set_xlim([0,2000])
+# # # ax.scatter(powr,bav, c = '#348feb', s = 8)
 
 
+# ###################################this clips some data
+# ax.set_ylim([0,1500])
 
-ax.set_ylabel('Velocity (mm/s)')
-ax2.set_ylabel('Depth (mm)')
-ax.set_xlabel('Date')
+# ax.scatter(tv,av, c=powr, cmap="inferno", s = 1)
 
 
-plt.savefig('time_depth.png', dpi = 600)
+# ax.scatter(tv,hv, c = '#5802e340', s = 1)
+
+# dstart = datetime(2020,7,30)
+# dend = datetime(2020,9,29)
+# ax.set_xlim(dstart,dend)
+# fig.autofmt_xdate()
+# #ax.set_xlim([0,2000])
+
+
+
+# ax.set_ylabel('Velocity (mm/s)')
+
+# ax.set_xlabel('Date')
+
+
 # plt.cla()
                    
 

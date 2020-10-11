@@ -46,6 +46,10 @@ for pt in ptstruct:
 def RMS(pts):
     DUp = 0.10 
 
+    maxx = max([x.u for x in pts])
+    minn = min([x.u for x in pts])
+    midd = 0.5*(maxx + minn)
+
     ampmean  = np.mean([x.p for x in pts])
     
     pts = [x for x in pts if (x.v > 0 and x.u > 0 )] #and 3*x.p > ampmean
@@ -60,14 +64,22 @@ def RMS(pts):
         
     R = math.sqrt(sumation/N)
     
-    errsum = 0
-    for pt in pts:
-        DU = DUp*pt.u
-        errsum += ((pt.v/pt.u - 1)*((pt.v/pt.u)*(DU/pt.u)))**2
     
-    DR = 1/(R *N)*math.sqrt(errsum)
+    meanerr =0
+    for pt in pts:
+        meanerr += (pt.v - pt.u)
+    M = meanerr/(N*midd)
+    
+    
+    
+    # errsum = 0
+    # for pt in pts:
+        # DU = DUp*pt.u
+        # errsum += ((pt.v/pt.u - 1)*((pt.v/pt.u)*(DU/pt.u)))**2
+    
+    # DR = 1/(R *N)*math.sqrt(errsum)
         
-    return round(R, 2), round(DR, 2), N 
+    return round(R, 2), round(M, 2), N 
 
 
 
