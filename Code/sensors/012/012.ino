@@ -1,5 +1,5 @@
 /*
-BoSL Velocity Firmware rev: 0.1.4
+BoSL Velocity Firmware rev: 0.1.5
 PSD Spectrum for hardware ID 012
 */
 
@@ -126,7 +126,7 @@ void getVel(int velMulti, int scans, bool plot = 0) {
 
 void setup() {
 
-  Serial.begin(2400);
+  Serial.begin(9600);
   Serial.print('R');
   
 }
@@ -188,9 +188,13 @@ void getFFT(bool fft){
 	pinMode(A0, OUTPUT);
 	pinMode(A1, OUTPUT);
 	digitalWrite(9, HIGH);
+	delay(20);
 	digitalWrite(3, HIGH);
+	delay(20);
 	digitalWrite(A0, HIGH);
+	delay(20);
 	digitalWrite(A1, HIGH);
+	delay(20);
 
 	I2c.begin();
 	I2c.setSpeed(1); //Note 200 kHz Bus Speed
@@ -457,7 +461,7 @@ void delDCcomp() {
 
 void getInf(){
 	Serial.println(F("ID: 012"));
-	Serial.println(F("Firmware rev: 0.1.4"));
+	Serial.println(F("Firmware rev: 0.1.5"));
 	Serial.println(F("Hardware rev: 0.1.3"));
 }
 

@@ -91,8 +91,11 @@ fig, ax = plt.subplots()
         # plt.cla()
 
 #for i in range(0,100,1):
-points = [pt for pt in points if pt.algoM()[0] != 0]
+
+#points = [pt for pt in points if pt.algoM()[0] != 0]
 # points = [pt for pt in points if pt.algoM()[0] > 300]
+
+
 
 tv = [x.get_time() for x in points]
 hv = [x.get_hach_vel() for x in points]
@@ -104,6 +107,8 @@ tvd = [x.algoM() for x in points]
 av = [x[0] for x in tvd]
 sv = [x[1] for x in tvd]
 powr = [x[2] for x in tvd]
+
+
 
 
 def intime(x,ds,de):
@@ -142,14 +147,14 @@ powr = [-slog(x) for x in powr]
 ###################################this clips some data
 ax.set_ylim([0,1500])
 
-ax.scatter(tv,av, c=powr, cmap="inferno", s = 1)
+ax.scatter(tv,bv, c=powr, cmap="inferno", s = 1)
 
 ax2 = ax.twinx()
 ax.scatter(tv,hv, c = '#5802e340', s = 1)
 #ax2.scatter(tv,dv, c = '#5802e340', s = 1)
 ax2.set_ylim([0,3000])
-dstart = datetime(2020,7,30)
-dend = datetime(2020,9,29)
+dstart = datetime(2020,9,22)
+dend = datetime(2020,10,15)
 ax.set_xlim(dstart,dend)
 fig.autofmt_xdate()
 #ax.set_xlim([0,2000])
@@ -161,7 +166,7 @@ ax2.set_ylabel('Depth (mm)')
 ax.set_xlabel('Date')
 
 
-plt.savefig('time_depth.png', dpi = 600)
+#plt.savefig('time_depth.png', dpi = 600)
 # plt.cla()
                    
 
