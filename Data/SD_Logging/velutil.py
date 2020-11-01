@@ -69,9 +69,9 @@ class SdPoint:
                 self.scale = 0
                 self.hach_vel = 0
                 self.hach_depth = 0
-                self.thrsh = 12000
-                self.ctlow = -4000
-                self.grad = -10000/64
+                self.thrsh = 8000
+                self.ctlow = -3000
+                self.ctend = -10000
                 self.cthigh = -800
 
 
@@ -121,7 +121,6 @@ class SdPoint:
                 return self.hach_depth
         def set_hach_depth(self, depth):
                 self.hach_depth = depth
-        
         def collect(self, plist):
             
             try:
@@ -151,13 +150,16 @@ class SdPoint:
             #fftpsd = [binn for binn in self.fft]
             
             #gausian
-            fftpsd = gf(fftpsd, sigma = 2)
+            fftpsd = gf(fftpsd, sigma = 3)
             
             #sobel derivative
+            #sob = [-1, 0 ,1]
             sob = [-1, 0 ,1]
             
             # dfft = [None] * 128
             dfft = []
+            
+            
             
             for i in range(len(fftpsd)):
                 try:
@@ -165,22 +167,24 @@ class SdPoint:
                 except IndexError:
                     val = 0
                 dfft.append(val)
-                
+            
+
+            noise_spike = False            
             for i,val in reversed(list(enumerate(dfft))):
                 if i > 64:
                     pass
-                elif val > i*self.grad:
-                    pass
+
+                if val > min(self.ctlow/psd[i],self.ctlow):#self.ctlow/psd[i]
+                    max_bin = i
                 elif val < dfft[i-1]:
                      max_bin = i
-                     #if (fftpsd[i] > self.thrsh):
-                     #   break 
-                     break
+                     if (fftpsd[i] > self.thrsh):
+                        break 
                 else:
                     pass
            
             max_val = dfft[max_bin]
-            
+            amp = fftpsd[max_bin]
             
             
             mean_indx = 0
@@ -189,6 +193,12 @@ class SdPoint:
             rdfft = dfft.copy()
             #remove negative
             dfft = [(0 if (x > 0.2*max_val) else x) for x in dfft]
+
+            def getelt(i):
+                try:
+                   return dfft[i]
+                except IndexError:
+                    return 0
 
             #isolate peak right and left
             is_peak = True
@@ -206,6 +216,7 @@ class SdPoint:
             
             is_peak = True
             for i,x in reversed(list(enumerate(dfft))):
+                
                 if i > max_bin:
                         pass
                 else:
@@ -223,12 +234,12 @@ class SdPoint:
             except ZeroDivisionError:
                 mean_indx = 0
                 std_indx = 0
-           
+
             
             
             mean_indx *= SdPoint.binconv
             std_indx *= SdPoint.binconv
-            return mean_indx, std_indx, max_val ,rdfft
+            return mean_indx, std_indx, amp ,rdfft, dfft
 
         def canny(self):
             if self.fft[0] == None:
