@@ -3,96 +3,88 @@ import numpy as np
 import matplotlib.dates as mdates
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from scipy.ndimage import gaussian_filter as gf
 import random
 from velutil import *
 
 points = []
 
-#print(psd_wtr)
 
-load_data(points)
+load_data(points, '000')
 #load_test(points)
+fig  = plt.figure()
+gs = gridspec.GridSpec(2, 1, figure=fig)
+ax = fig.add_subplot(gs[0, :])
+
+coax = fig.add_subplot(gs[1, :])
 
 
-fig, ax = plt.subplots()
-#ax2 = ax.twinx()
-##
+for _ in range(6000,6500,5):
+    pt = points[_]
+
+    psd = rpsd('5k6_wtr_wait.csv')
+
+    if pt.get_fft()[0] == None:
+           #print(_)
+           continue
+
+    hach_vem = pt.get_hach_vel()   
+   
+    vels = [SdPoint.binconv * i for i in range(128)]
+
+    plfft = pt.get_fft()
+    psdfft = [x for x in plfft]
+    psdfft = [binn/(weight) for binn,weight in zip(plfft, psd)]
+    psdfft = gf(psdfft, 2)
+    psdfft = [x for x in psdfft]
 
 
 
+    alvem, alves, maxvel,dfft = pt.cannym(psd)
+    
+    dfft = [x for x in dfft]
+
+    ax.plot(vels, plfft, label = 'raw fft')
+    
+    coax.plot(vels, dfft, label = 'dfft', c = 'g')
+    ax.plot(vels, psdfft, label = 'whitened fft')
+
+    ax.vlines(hach_vem, 0 , 1E12, label = 'hach vel')
+    
+    ax.vlines(alvem, 0 , 1E12, colors = "r", label = 'bosl fft')
+    coax.hlines(0,0,1E12, colors = 'k')
+    
+    coax.plot([0,64*SdPoint.binconv],[0,-10000])
+    #coax.hlines(pt.ctlow,0,1E12, colors = 'k')
+   
+    ax.add_patch(patches.Rectangle((0,0), 4000 , pt.thrsh, facecolor="#ed092040"))
 
 
+    ax.set_xlim(0,64*SdPoint.binconv)
+    ax.set_ylim(10,25000000)
+    coax.set_xlim(0,64*SdPoint.binconv)
+    coax.set_ylim(-25000,25000)
 
-# ave = 5
-# apoints = []
-# for i in range(len(points)):
-        # try:
-                # pt = SdPoint()
-                # pt.collect(points[i:i+ave])
-                # apoints.append(pt)
-        # except IndexError:
-                # pass
-        
+    ax.set_title(str(pt.get_time()) +"  |   " + str(pt.get_id()))
+    ax.set_xlabel("Velocity (mm/s)")
+    ax.set_yscale('symlog')
+    ax.set_ylabel("Amplitude")
+    ax.legend(loc = 'upper right')
+    plt.savefig('out\\' + str(_) + '.png', dpi = 300)
+
+    
+    ax.clear()
+    coax.clear()
+
+# #for i in range(0,100,1):
 
 
+plt.close(fig)
+figu, axv  = plt.subplots()
+coaxvu = axv.twinx()
 
-
-# for _ in range(10000,14000,10):
-        # pt = points[_]
-
-        # if pt.get_fft()[0] == None:
-               # continue
-
-        # hach_vem = pt.get_hach_vel()
-        # vem = pt.get_vemc()
-        # ves = pt.get_vesc()
-       
-       
-        # vels = [SdPoint.binconv * i for i in range(128)]
-
-        # plfft = pt.get_fft()
-        # # # plfft[0] = 0
-        # # #plfft[1] = 0
-        # pldfft = [val/weight for (val,weight) in zip(plfft, psd_wtr)]
-        # # pldfft = gf(pldfft, sigma = 1)
-        # pldfft = gf(pldfft, sigma = 1)
-        # pldfft = [x for x in pldfft]
-        
-        # #dfft = pt.canny()
-       
-        # #plafft = [val/weight for (val,weight) in zip(plfft, psd_wtr)]
-
-        # alvem, alves, dfft = pt.algoM()
- 
-
-        # #ax.plot(vels, plfft)
-        # ax.plot(vels, pldfft)
-        # #ax.plot(vels, dfft)
-        # #ax.plot(vels, plafft)
-        # ax.vlines(hach_vem, 0 , 1E12)
-        # #ax.vlines(vem, 0 , 1E12, colors = "g")
-        # ax.vlines(alvem, 0 , 1E12, colors = "r")
-       
-        # #ax.add_patch(patches.Rectangle((0,0), 5*SdPoint.binconv , 1E12, facecolor="#ed092040"))
-        # ax.add_patch(patches.Rectangle((0,0), 4000 , 8000, facecolor="#ed092040"))
-        # #ax.add_patch(patches.Rectangle((vem - ves,0), 2*ves , 1E12, facecolor="#e8a40540"))
-        # ax.add_patch(patches.Rectangle((alvem - alves,0), 2*alves , 1E12, facecolor="#34eb7440"))
-        # ax.set_xlim(0,32*SdPoint.binconv)
-        # ax.set_ylim(0,250000)
-
-        # ax.set_title(pt.get_time())
-        # ax.set_xlabel("Velocity (mm/s)")
-        # ax.set_ylabel("Amplitude")
-        # # plt.show()
-        # # exit()
-        # plt.savefig('out\\' + str(pt.get_id()) + '.png', dpi = 300)
-
-        # plt.cla()
-
-#for i in range(0,100,1):
-
-#points = [pt for pt in points if pt.algoM()[0] != 0]
+points = [pt for pt in points if pt.cannym(rpsd('5k6_air.csv'))[0] != 0]
 # points = [pt for pt in points if pt.algoM()[0] > 300]
 
 
@@ -103,7 +95,7 @@ dv = [1000*x.get_hach_depth() for x in points]
 bv = [x.get_vem() for x in points]    
 bsv = [x.get_ves() for x in points]  
 bav = [x.get_vea() for x in points]      
-tvd = [x.algoM() for x in points]
+tvd = [x.cannym(rpsd('5k6_air.csv')) for x in points]
 av = [x[0] for x in tvd]
 sv = [x[1] for x in tvd]
 powr = [x[2] for x in tvd]
@@ -145,25 +137,25 @@ powr = [-slog(x) for x in powr]
 
 
 ###################################this clips some data
-ax.set_ylim([0,1500])
+axv.set_ylim([0,2000])
 
-ax.scatter(tv,bv, c=powr, cmap="inferno", s = 1)
+axv.scatter(tv,av, c=powr, cmap="inferno", s = 1)
 
-ax2 = ax.twinx()
-ax.scatter(tv,hv, c = '#5802e340', s = 1)
+coaxv = ax.twinx()
+axv.scatter(tv,hv, c = '#5802e340', s = 1)
 #ax2.scatter(tv,dv, c = '#5802e340', s = 1)
-ax2.set_ylim([0,3000])
-dstart = datetime(2020,9,22)
-dend = datetime(2020,10,15)
-ax.set_xlim(dstart,dend)
+coaxv.set_ylim([0,3000])
+dstart = datetime(2020,9,15)
+dend = datetime(2020,9,29)
+axv.set_xlim(dstart,dend)
 fig.autofmt_xdate()
 #ax.set_xlim([0,2000])
 
 
 
-ax.set_ylabel('Velocity (mm/s)')
-ax2.set_ylabel('Depth (mm)')
-ax.set_xlabel('Date')
+axv.set_ylabel('Velocity (mm/s)')
+coaxv.set_ylabel('Depth (mm)')
+axv.set_xlabel('Date')
 
 
 #plt.savefig('time_depth.png', dpi = 600)

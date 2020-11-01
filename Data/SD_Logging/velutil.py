@@ -21,6 +21,31 @@ psd_air_8 = [x/(sum(psd_air_raw_8)/len(psd_air_raw_8)) for x in psd_air_raw_8]
 
 
 
+def rpsd(fn):
+
+    if fn in rpsd.cashe:
+
+        return rpsd.cashe[fn]
+    else:
+        psd = []
+
+        with open('../PSD/sensor_norm/' + fn, newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for i,row in enumerate(spamreader):
+                if (i == 0):
+                    continue
+                if (i == 9):
+                    break
+                psd = psd + row
+        psd = [float(x) for x in psd if x != '']
+        
+        psd = [x/(sum(psd)/len(psd)) for x in psd]
+        
+        rpsd.cashe[fn] = psd
+        
+    return psd
+rpsd.cashe = {}
+
 
 # for i in range (8):
     # for j in range(16):
@@ -44,8 +69,9 @@ class SdPoint:
                 self.scale = 0
                 self.hach_vel = 0
                 self.hach_depth = 0
-                self.thrsh = 8000
-                self.ctlow = -2000
+                self.thrsh = 12000
+                self.ctlow = -4000
+                self.grad = -10000/64
                 self.cthigh = -800
 
 
@@ -113,7 +139,7 @@ class SdPoint:
             except TypeError:
                 pass
 
-        def cannym(self):
+        def cannym(self, psd):
 
             if self.fft[0] == None:
                return 0, 0, 0 , 0
@@ -121,10 +147,11 @@ class SdPoint:
             
             max_bin = 0
             #whiten noise
-            fftpsd = [binn/weight for binn,weight in zip(self.fft, psd_air_8)]
+            fftpsd = [binn/weight for binn,weight in zip(self.fft, psd)]
+            #fftpsd = [binn for binn in self.fft]
             
             #gausian
-            fftpsd = gf(fftpsd, sigma = 1)
+            fftpsd = gf(fftpsd, sigma = 2)
             
             #sobel derivative
             sob = [-1, 0 ,1]
@@ -142,10 +169,12 @@ class SdPoint:
             for i,val in reversed(list(enumerate(dfft))):
                 if i > 64:
                     pass
-                elif val > self.ctlow:
+                elif val > i*self.grad:
                     pass
                 elif val < dfft[i-1]:
                      max_bin = i
+                     #if (fftpsd[i] > self.thrsh):
+                     #   break 
                      break
                 else:
                     pass
@@ -157,6 +186,7 @@ class SdPoint:
             mean_indx = 0
             std_indx = 0
      
+            rdfft = dfft.copy()
             #remove negative
             dfft = [(0 if (x > 0.2*max_val) else x) for x in dfft]
 
@@ -198,7 +228,7 @@ class SdPoint:
             
             mean_indx *= SdPoint.binconv
             std_indx *= SdPoint.binconv
-            return mean_indx, std_indx, max_val ,dfft
+            return mean_indx, std_indx, max_val ,rdfft
 
         def canny(self):
             if self.fft[0] == None:
@@ -233,7 +263,6 @@ class SdPoint:
                     pass
                 elif val < dfft[i-1]:
                      mean_indx = i
-                     break
                 else:
                     pass
            
@@ -323,7 +352,7 @@ class SdPoint:
             return mean_indx, std_indx, vea
             
             
-        def algoM(self):
+        def algoM(self, psd):
         
             if self.fft[0] == None:
                return 0, 0, 0
@@ -331,8 +360,8 @@ class SdPoint:
             fftpsd = [x for x in self.fft]
             # fftpsd[0] = 0
             # fftpsd[1] = 0
-            fftpsd = [binn/weight for binn,weight in zip(fftpsd, psd_wtr)]
-            #fftpsd = np.convolve(fftpsd, np.ones((8,))/8, mode='same')
+            fftpsd = [binn/(weight) for binn,weight in zip(fftpsd, psd)]
+            fftpsd = gf(fftpsd, 1)
             fftpsd = [x for x in fftpsd]
 
             
@@ -355,11 +384,11 @@ class SdPoint:
             max_bin = fft.index(ampmax)
 
             
-            if (max_bin < 8):
-                upmax = max(fft[8:16])
-                if (upmax > threshold):
-                    ampmax = upmax
-                    max_bin = fft.index(ampmax)
+            # if (max_bin < 8):
+                # upmax = max(fft[8:16])
+                # if (upmax > threshold):
+                    # ampmax = upmax
+                    # max_bin = fft.index(ampmax)
 
             #set theshold
             ##fft = [x - self.thrsh for x in fft]
@@ -479,10 +508,10 @@ class SdPoint:
             std_indx *= SdPoint.binconv
             return mean_indx, std_indx, vea
 
-def load_data(points):
+def load_data(points, device):
 
-    device = '008'
-    sp_st = 6
+    sp_st = 7
+    sp_ed = 9
 
     hach_date = []
     hach_depth = []
@@ -529,9 +558,9 @@ def load_data(points):
             pass
 
     
-    weeks = list(zip(hach_fl, log_fl, sd_fl))[sp_st:]
+    weeks = list(zip(hach_fl, log_fl, sd_fl))[sp_st:sp_ed]
     
-    print(weeks)
+    [print(x) for x in weeks]
     
     for hach_f,log_f,sd_f in weeks:
         point_bach = []
@@ -641,7 +670,7 @@ def load_data(points):
                         if skip:
                                 skip = False
                                 continue
-
+                        
                         if (point.match(idsd,vemsd,vessd)):
                                 for j in range(128):
                                         point.set_fft(float(row[j+3]),j)

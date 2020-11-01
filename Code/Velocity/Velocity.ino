@@ -114,9 +114,9 @@ void getVel(int velMulti, int scans, bool plot = 0) {
 	   plotFFT();
    }
    if(debug){
-	    //plotFFT();
-	    //Serial.println();
-	   printFFT();
+	    plotFFT();
+	    Serial.println();
+	   //printFFT();
    }
 
    maxPeak(velMulti);
