@@ -69,8 +69,8 @@ class SdPoint:
                 self.scale = 0
                 self.hach_vel = 0
                 self.hach_depth = 0
-                self.thrsh = 8000
-                self.ctlow = -3000
+                self.thrsh = 8000 #for cannym
+                self.ctlow = -0.35
                 self.ctend = -10000
                 self.cthigh = -800
 
@@ -139,18 +139,21 @@ class SdPoint:
                 pass
 
         def cannym(self, psd):
-
+            indx_low = 3
+            indx_high = 64
             if self.fft[0] == None:
                return 0, 0, 0 , 0
-            
             
             max_bin = 0
             #whiten noise
             fftpsd = [binn/weight for binn,weight in zip(self.fft, psd)]
             #fftpsd = [binn for binn in self.fft]
-            
+
             #gausian
-            fftpsd = gf(fftpsd, sigma = 3)
+            fftpsd = [math.log(x) for x in fftpsd]
+            fftpsd = gf(fftpsd, sigma = 2)
+            
+            ret_fftpsd = fftpsd.copy()
             
             #sobel derivative
             #sob = [-1, 0 ,1]
@@ -163,29 +166,25 @@ class SdPoint:
             
             for i in range(len(fftpsd)):
                 try:
-                    val =  sum([x*y for x,y in zip(sob,fftpsd[i-1:i+2])])
+                    val = sum([x*y for x,y in zip(sob,fftpsd[i-1:i+2])])
                 except IndexError:
                     val = 0
                 dfft.append(val)
             
 
-            noise_spike = False            
-            for i,val in reversed(list(enumerate(dfft))):
-                if i > 64:
-                    pass
+            ctlow = self.ctlow
 
-                if val > min(self.ctlow/psd[i],self.ctlow):#self.ctlow/psd[i]
+            noise_spike = False            
+            for i,val in reversed(list(enumerate(dfft))[indx_low:indx_high]):
+                if val > ctlow:
                     max_bin = i
                 elif val < dfft[i-1]:
                      max_bin = i
-                     if (fftpsd[i] > self.thrsh):
-                        break 
+                     break
                 else:
                     pass
            
             max_val = dfft[max_bin]
-            amp = fftpsd[max_bin]
-            
             
             mean_indx = 0
             std_indx = 0
@@ -193,7 +192,7 @@ class SdPoint:
             rdfft = dfft.copy()
             #remove negative
             dfft = [(0 if (x > 0.2*max_val) else x) for x in dfft]
-
+            
             def getelt(i):
                 try:
                    return dfft[i]
@@ -226,20 +225,18 @@ class SdPoint:
                                 is_peak = False
                                 dfft[i] = 0
 
-
             #find mean and stdev
+            amp = -sum(dfft[indx_low:indx_high])
             try:
-                mean_indx = np.average(list(range(2,64)), weights = dfft[2:64])
-                std_indx = math.sqrt(np.average((list(range(2,64))-mean_indx)**2, weights=dfft[2:64]))
+                mean_indx = np.average(list(range(indx_low,indx_high)), weights = dfft[indx_low:indx_high])
+                std_indx = math.sqrt(np.average((list(range(indx_low,indx_high))-mean_indx)**2, weights=dfft[indx_low:indx_high]))
             except ZeroDivisionError:
                 mean_indx = 0
                 std_indx = 0
-
-            
             
             mean_indx *= SdPoint.binconv
             std_indx *= SdPoint.binconv
-            return mean_indx, std_indx, amp ,rdfft, dfft
+            return mean_indx, std_indx, amp ,rdfft, dfft, ret_fftpsd, ctlow
 
         def canny(self):
             if self.fft[0] == None:
@@ -372,17 +369,20 @@ class SdPoint:
             # fftpsd[0] = 0
             # fftpsd[1] = 0
             fftpsd = [binn/(weight) for binn,weight in zip(fftpsd, psd)]
-            fftpsd = gf(fftpsd, 1)
+            #fftpsd = gf(fftpsd, 1)
             fftpsd = [x for x in fftpsd]
 
             
-            return self.algoATM(fftpsd)
+            return self.algoATM(fftpsd, psd)
         
-        def algoATM(self, fft = None):
+        def algoATM(self, fft = None, psd = None):
             indx_low = 3
             indx_high = 64
-            threshold = self.thrsh
-        
+            #threshold = self.thrsh
+            threshold = max(np.mean(fft[indx_low:indx_high]),self.thrsh)
+            #self.thrsh = threshold
+            ##########
+            
             if fft is None:
                 fft = self.fft
 
@@ -405,7 +405,7 @@ class SdPoint:
             ##fft = [x - self.thrsh for x in fft]
 
             #remove negative
-            fft = [(0 if (x < threshold) else x) for x in fft]
+            fft = [(0 if (fft[i] < threshold) else fft[i]) for i in range(len(fft))]
 
             #isolate peak right and left
             is_peak = True
