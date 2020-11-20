@@ -23,8 +23,8 @@ ax = fig.add_subplot(gs[0, :])
 
 coax = fig.add_subplot(gs[1, :])
 
-if True:
-    for _ in range(6800,7300,4):
+if False:
+    for _ in range(7000,7500,5):
         pt = points[_]
 
         psd = rpsd('5k6_wtr_wait.csv')
@@ -87,8 +87,8 @@ ax = fig.add_subplot(gs[0, :])
 
 coax = fig.add_subplot(gs[1, :])
 
-
-points = [pt for pt in points if pt.cannym(rpsd('5K6_wtr_wait.csv'))[0] != 0]
+points = [pt for pt in points if (pt.cannym(rpsd('5K6_wtr_wait.csv'))[0] != 0)]
+points = [pt for pt in points if not(pt.cannym(rpsd('5K6_wtr_wait.csv'))[0] > 300 and pt.cannym(rpsd('5K6_wtr_wait.csv'))[2] < 2.5)]
 # points = [pt for pt in points if pt.algoM()[0] > 300]
 
 
@@ -109,20 +109,20 @@ mpowr = np.mean(powr)
 powr = [x if x < mpowr else mpowr for x in powr]
 
 ###################################this clips some data
-ax.set_ylim([0,2000])
+ax.set_ylim([0,1250])
 ax.yaxis.grid()
-coax.set_ylim([0,2000])
+coax.set_ylim([0,1250])
 coax.yaxis.grid()
 
-pc = ax.scatter(tv,av, c = powr, s = 4)
+pc = ax.scatter(tv,av, c = powr, cmap = 'viridis_r', s = 4)
 
 
 copc = coax.scatter(tv,hv, c = '#5802e340', s = 2)
 
 #coaxv.scatter(tv,dv, c = '#5802e340', s = 1)
 
-dstart = datetime(2020,9,23)
-dend = datetime(2020,9,29)
+dstart = datetime(2020,8,27)
+dend = datetime(2020,10,14)
 ax.set_xlim(dstart,dend)
 coax.set_xlim(dstart,dend)
 fig.autofmt_xdate()
@@ -139,17 +139,25 @@ plt.subplots_adjust(top=0.99, right=1.1,bottom=0.1,left=0.05)
 plt.colorbar(pc, ax=ax)
 plt.colorbar(copc, ax=coax)
 plt.show()
+
+
 plt.close(fig)
 
-# figu, axv = plt.subplots()
 
-# axv.set_ylim([0,2000])
-# axv.set_xlim([0,2000])
-# axv.set_ylabel('BoSL Velocity (mm/s)')
-# axv.set_xlabel('HACH Velocity (mm/s)')
-# axv.scatter(hv,av, c=powr, cmap="inferno", s = 1)
-# axv.plot([0,2000],[0,2000], c = 'r')
 
+
+figu, axv = plt.subplots()
+
+axv.set_ylim([0,1250])
+axv.set_xlim([0,1250])
+axv.yaxis.grid()
+axv.xaxis.grid()
+axv.set_ylabel('BoSL Velocity (mm/s)')
+axv.set_xlabel('HACH Velocity (mm/s)')
+axv.scatter(hv,av, c=powr, cmap = 'viridis_r', s = 4)
+axv.plot([0,2000],[0,2000], c = 'r')
+
+plt.show()
 
 #plt.savefig('time_depth.png', dpi = 600)
 # plt.cla()

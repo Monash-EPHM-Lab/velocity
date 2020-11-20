@@ -173,16 +173,42 @@ class SdPoint:
             
 
             ctlow = self.ctlow
-
-            noise_spike = False            
+            ctinc = -1
+            peak_can = False
+            
+            first_zero = True
+            lst_zero = indx_high
+            peak_int = 0
             for i,val in reversed(list(enumerate(dfft))[indx_low:indx_high]):
-                if val > ctlow:
-                    max_bin = i
-                elif val < dfft[i-1]:
-                     max_bin = i
-                     break
+                if peak_can == False:
+                    if val > 0:
+                        lst_zero = i
+                        peak_int = 0
+                    else:
+                        peak_int += val
+                        
+                    if val > ctlow:
+                        max_bin = i
+                    elif val < dfft[i-1]:
+                        max_bin = i
+                        peak_can = True
+                    else:
+                        pass
                 else:
-                    pass
+                    peak_int += val
+                    if first_zero:
+                        if val > 0:
+                            first_zero = False
+                    else:
+                        if val < 0:
+                            if peak_int < ctinc:
+                                break
+                            else:
+                                peak_can = False
+                                first_zero = True
+                                lst_zero = i
+                                peak_int = 0
+                
            
             max_val = dfft[max_bin]
             
@@ -234,7 +260,7 @@ class SdPoint:
                 mean_indx = 0
                 std_indx = 0
             
-            mean_indx *= SdPoint.binconv
+            mean_indx *= SdPoint.binconv * 0.6#0.6 falling edge mean velocity fudge factor
             std_indx *= SdPoint.binconv
             return mean_indx, std_indx, amp ,rdfft, dfft, ret_fftpsd, ctlow
 
@@ -521,8 +547,8 @@ class SdPoint:
 
 def load_data(points, device):
 
-    sp_st = 7
-    sp_ed = 9
+    sp_st = 3
+    sp_ed = 11
 
     hach_date = []
     hach_depth = []
