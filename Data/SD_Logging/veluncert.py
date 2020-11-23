@@ -12,12 +12,29 @@ points = []
 
 #print(psd_wtr)
 
-load_data(points)
+load_data(points, '000')
 #load_test(points)
 
 
-fig, ax = plt.subplots()
-
+##000 hach const filter
+def no_data_rem(pt):
+    pt_time = pt.get_time()
+    
+    del_times = [[datetime(2020,7,29, hour = 12),datetime(2020,7,29, hour = 19)],
+                 [datetime(2020,9,8, hour = 10),datetime(2020,9,8, hour = 20)],
+                 [datetime(2020,9,22, hour = 8),datetime(2020,9,22, hour = 17)],
+                 [datetime(2020,9,29, hour = 9),datetime(2020,9,29, hour = 16)],
+                 [datetime(2020,10,6, hour = 8),datetime(2020,10,7, hour = 15)],
+                ]
+    for rang in del_times:
+        if  rang[0] < pt_time < rang[1]:
+            return False
+    return True
+    
+    
+points = [pt for pt in points if no_data_rem(pt)]    
+points = [pt for pt in points if (pt.cannym(rpsd('5K6_wtr_wait.csv'))[0] != 0)]
+points = [pt for pt in points if not(pt.cannym(rpsd('5K6_wtr_wait.csv'))[0] > 250 and pt.cannym(rpsd('5K6_wtr_wait.csv'))[2] < 3)]
 
 class pointstruct:
     def __init__(self, a, u):
@@ -29,10 +46,10 @@ class pointstruct:
     # def __repr__(self):
         # return str(self.u)
 
-bin_size = 200
+bin_size = 250
 
-ptstruct = [pointstruct(x.algoM(),x.get_hach_vel()) for x in points]
-# ptstruct = [pointstruct([x.get_vem(),None,x.get_vea()],x.get_hach_vel()) for x in points]
+ptstruct = [pointstruct(x.cannym(rpsd('5K6_wtr_wait.csv')),x.get_hach_vel()) for x in points]
+
 
 velpartition  = [list() for i in range(5000//bin_size)]
 
@@ -93,41 +110,4 @@ for i,rnge in enumerate(velpartition):
     print(str(RMS(rnge)) + "    " +str(i*bin_size))
     
 
-# #sv = [np.mean(sv) if x > np.mean(sv) else x for x in sv]
-# powr = [np.mean(powr) if x > np.mean(powr) else x for x in powr]   
-
-
-# batches
-# # for a,b in zip(av,bv):
-    # # print(a)
-    # # print(b)
-    # # input()
-
-# # ax.scatter(powr,bav, c = '#348feb', s = 8)
-
-
-
-
-# # ax.scatter(tv,av, c=powr, cmap="Blues", s = 8)
-
-# # ax.scatter(tv,hv, c = '#f0952640', s = 8)
-# #ax.scatter(tv,dv, c = '#5802e340', s = 8)
-# # dstart = datetime(2020,7,27)
-# # dend = datetime(2020,9,27)
-# # ax.set_xlim(dstart,dend)
-
-# # ax.plot([0,2000],[0,2000], c = 'r' )
-# # ax.scatter(hv,av, c=powr, cmap="Blues", s = 8)
-
-
-
-# # plt.savefig('out\\' + str(i) + '.png', dpi = 300)
-# # plt.cla()
-                   
-
-
-# plt.show()
-
-     
-#plt.scatter([point.get_hach_vel() for point in points],[point.get_vem() for point in points], s = 4)
 

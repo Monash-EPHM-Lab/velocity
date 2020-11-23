@@ -149,7 +149,7 @@ class SdPoint:
             fftpsd = [binn/weight for binn,weight in zip(self.fft, psd)]
             #fftpsd = [binn for binn in self.fft]
 
-            #gausian
+            #gausian #for the ATmega implenetation we should probably take the difference of the two logs for the PSD 
             fftpsd = [math.log(x) for x in fftpsd]
             fftpsd = gf(fftpsd, sigma = 2)
             

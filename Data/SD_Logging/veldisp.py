@@ -14,6 +14,26 @@ points = []
 load_data(points, '000')
 #load_test(points)
 
+##000 hach const filter
+def no_data_rem(pt):
+    pt_time = pt.get_time()
+    
+    del_times = [[datetime(2020,7,29, hour = 12),datetime(2020,7,29, hour = 19)],
+                 [datetime(2020,9,8, hour = 10),datetime(2020,9,8, hour = 20)],
+                 [datetime(2020,9,22, hour = 8),datetime(2020,9,22, hour = 17)],
+                 [datetime(2020,9,29, hour = 9),datetime(2020,9,29, hour = 16)],
+                 [datetime(2020,10,6, hour = 8),datetime(2020,10,7, hour = 15)],
+                ]
+    for rang in del_times:
+        if  rang[0] < pt_time < rang[1]:
+            return False
+    return True
+    
+    
+points = [pt for pt in points if no_data_rem(pt)]    
+
+
+
 
 #fig,ax = plt.subplots()
 
@@ -27,7 +47,7 @@ if False:
     for _ in range(7000,7500,5):
         pt = points[_]
 
-        psd = rpsd('5k6_wtr_wait.csv')
+        psd = rpsd('5K6_wtr_wait.csv')
 
         if pt.get_fft()[0] == None:
                #print(_)
@@ -88,10 +108,13 @@ ax = fig.add_subplot(gs[0, :])
 coax = fig.add_subplot(gs[1, :])
 
 points = [pt for pt in points if (pt.cannym(rpsd('5K6_wtr_wait.csv'))[0] != 0)]
-points = [pt for pt in points if not(pt.cannym(rpsd('5K6_wtr_wait.csv'))[0] > 300 and pt.cannym(rpsd('5K6_wtr_wait.csv'))[2] < 2.5)]
+points = [pt for pt in points if not(pt.cannym(rpsd('5K6_wtr_wait.csv'))[0] > 250 and pt.cannym(rpsd('5K6_wtr_wait.csv'))[2] < 3)]
 # points = [pt for pt in points if pt.algoM()[0] > 300]
 
+def get_pwr(pt):
+    return pt.cannym(rpsd('5K6_wtr_wait.csv'))[2]
 
+points.sort(key = get_pwr)
 
 tv = [x.get_time() for x in points]
 hv = [x.get_hach_vel() for x in points]
@@ -105,8 +128,8 @@ sv = [x[1] for x in tvd]
 powr = [x[2] for x in tvd]
 
 
-mpowr = np.mean(powr)
-powr = [x if x < mpowr else mpowr for x in powr]
+mpowr = 1.7*np.mean(powr)
+powr = [(math.exp(x)/math.exp(mpowr))**0.3 if x < mpowr else 1 for x in powr]
 
 ###################################this clips some data
 ax.set_ylim([0,1250])
@@ -121,7 +144,7 @@ copc = coax.scatter(tv,hv, c = '#5802e340', s = 2)
 
 #coaxv.scatter(tv,dv, c = '#5802e340', s = 1)
 
-dstart = datetime(2020,8,27)
+dstart = datetime(2020,7,29)
 dend = datetime(2020,10,14)
 ax.set_xlim(dstart,dend)
 coax.set_xlim(dstart,dend)
@@ -132,16 +155,83 @@ fig.autofmt_xdate()
 
 ax.set_ylabel('Velocity BoSL (mm/s)')
 coax.set_ylabel('Velocity HACH (mm/s)')
-ax.set_xlabel('Date')
+#ax.set_xlabel('Date')
 coax.set_xlabel('Date')
 
-plt.subplots_adjust(top=0.99, right=1.1,bottom=0.1,left=0.05)
-plt.colorbar(pc, ax=ax)
+plt.subplots_adjust(top=0.95, right=1.0,bottom=0.2,left=0.15)
 plt.colorbar(copc, ax=coax)
+cbar = plt.colorbar(pc, ax=ax)
+cbar.set_label('Signal Stregnth (arb)')
+
+##############plt.savefig('time_vel.png', dpi = 600)
+
 plt.show()
 
+plt.close(fig)
+
+
+
+
+
+
+
+
+
+fig  = plt.figure()
+gs = gridspec.GridSpec(2, 1, figure=fig, height_ratios = [2,1])
+ax = fig.add_subplot(gs[0, :])
+
+coax = fig.add_subplot(gs[1, :])
+
+
+###################################this clips some data
+ax.set_ylim([0,1250])
+ax.yaxis.grid()
+coax.set_ylim([0,3000])
+coax.yaxis.grid()
+
+pc = ax.scatter(tv,av, c = powr, cmap = 'viridis_r', s = 4)
+
+
+copc = coax.scatter(tv,dv, c = '#5802e340', s = 2)
+
+#coaxv.scatter(tv,dv, c = '#5802e340', s = 1)
+
+dstart = datetime(2020,7,29)
+dend = datetime(2020,10,14)
+ax.set_xlim(dstart,dend)
+coax.set_xlim(dstart,dend)
+fig.autofmt_xdate()
+#ax.set_xlim([0,2000])
+
+
+
+ax.set_ylabel('Velocity BoSL (mm/s)')
+coax.set_ylabel('Water Depth (mm)')
+#ax.set_xlabel('Date')
+coax.set_xlabel('Date')
+
+plt.subplots_adjust(top=0.95, right=1.0,bottom=0.2,left=0.15)
+plt.colorbar(copc, ax=coax)
+cbar = plt.colorbar(pc, ax=ax)
+cbar.set_label('Signal Stregnth (arb)')
+
+###########plt.savefig('time_depth.png', dpi = 600)
+
+plt.show()
 
 plt.close(fig)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -155,8 +245,11 @@ axv.xaxis.grid()
 axv.set_ylabel('BoSL Velocity (mm/s)')
 axv.set_xlabel('HACH Velocity (mm/s)')
 axv.scatter(hv,av, c=powr, cmap = 'viridis_r', s = 4)
-axv.plot([0,2000],[0,2000], c = 'r')
+pc = axv.plot([0,2000],[0,2000], c = 'r')
+cbar = plt.colorbar(pc, ax=axv)
+cbar.set_label('Signal Stregnth (arb)')
 
+plt.savefig('vel_corr.png', dpi = 600)
 plt.show()
 
 #plt.savefig('time_depth.png', dpi = 600)
