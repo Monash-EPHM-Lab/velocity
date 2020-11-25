@@ -70,13 +70,20 @@ class SdPoint:
                 self.hach_vel = 0
                 self.hach_depth = 0
                 self.thrsh = 8000 #for cannym
-                self.ctlow = -0.35
+                self.ctlow = -0.35 #ID5K6-0.35
                 self.ctend = -10000
                 self.cthigh = -800
-
+        
+        def naneq(self,a,b):
+            if  a == b:
+                return True
+            if math.isnan(a) and math.isnan(b):
+                return True
+            else:
+                return False
 
         def match (self, idv, vem, ves):
-                if (idv == self.idv) and (vem == self.vem) and (ves == self.ves):
+                if (self.naneq(idv,self.idv)) and (self.naneq(vem,self.vem)) and (self.naneq(ves,self.ves)):
                         return True
                 else:
                         return False
@@ -260,7 +267,7 @@ class SdPoint:
                 mean_indx = 0
                 std_indx = 0
             
-            mean_indx *= SdPoint.binconv * 0.6#0.6 falling edge mean velocity fudge factor
+            mean_indx *= SdPoint.binconv  *0.6#0.6 falling edge mean velocity fudge factor
             std_indx *= SdPoint.binconv
             return mean_indx, std_indx, amp ,rdfft, dfft, ret_fftpsd, ctlow
 
@@ -547,8 +554,8 @@ class SdPoint:
 
 def load_data(points, device):
 
-    sp_st = 3
-    sp_ed = 11
+    sp_st = 15
+    sp_ed = 17
 
     hach_date = []
     hach_depth = []
@@ -613,23 +620,26 @@ def load_data(points, device):
                             date_string = row[0] + " " + row[2]
                             hach_date.append(datetime.strptime(date_string, '%d/%b/%y %H:%M'))
                             hach_depth.append(float(row[12]))
-                            hach_vel.append(float(row[17])*1000)
+                            hach_vel.append(float(row[17].strip('*'))*1000)
         if(log_f != 0):
            
             with open(log_f, newline='') as csvfile:
                     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
                     for i,row in enumerate(spamreader):
 
+                        try:
+                            point_bach.append(SdPoint())
                             try:
-                                point_bach.append(SdPoint())
-                                
                                 point_bach[i].set_time(datetime.strptime(row[0], '%d/%m/%y %I:%M:%S %p')+timedelta(hours=10))
-                                point_bach[i].set_id(float(row[1]))
-                                point_bach[i].set_vem(float(row[7])) 
-                                point_bach[i].set_ves(float(row[8]))
-                                point_bach[i].set_vea(float(row[9]))                            
                             except ValueError:
-                                pass
+                                point_bach[i].set_time(datetime.strptime(row[0], '%d/%m/%Y %H:%M')+timedelta(hours=10))
+                            point_bach[i].set_id(float(row[1]))
+                            point_bach[i].set_vem(float(row[7])) 
+                            point_bach[i].set_ves(float(row[8]))
+                            point_bach[i].set_vea(float(row[9]))
+                        except ValueError:
+                            pass
+                            
         hi = 0;
         skip = False
        
@@ -688,10 +698,11 @@ def load_data(points, device):
                         try:
                             point = point_bach[hi]
                         
-                        
+                            
                             while(point.get_id() < idsd):
                                     hi += 1;
                                     point = point_bach[hi]
+                            
 
                             while(point.get_id() > idsd):
                                     hi -= 1;
@@ -746,3 +757,12 @@ def load_test(points):
                         
                         points.append(point)
     return points
+    
+def export_points(points, psd ,fp):
+    with open(fp, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        
+        for pt in points:
+            writer.writerow([pt.get_time(),pt.get_hach_depth(), pt.get_hach_vel(), pt.cannym(rpsd(psd))[0], pt.cannym(rpsd(psd))[2]])
+       
