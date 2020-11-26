@@ -7,30 +7,36 @@ import matplotlib.gridspec as gridspec
 from scipy.ndimage import gaussian_filter as gf
 import random
 from velutil import *
+import time
 
 points = []
 
 
-load_data(points, '010')
+load_data(points, '000',3,11)
+
+#load_test(points, '008',15,17)
+
+psdfp = '5k6_wtr_wait.csv'
+
 #load_test(points)
 
-# # ##000 hach const filter
-# # def no_data_rem(pt):
-    # # pt_time = pt.get_time()
+##000 hach const filter
+def no_data_rem(pt):
+    pt_time = pt.get_time()
     
-    # # del_times = [[datetime(2020,7,29, hour = 12),datetime(2020,7,29, hour = 19)],
-                 # # [datetime(2020,9,8, hour = 10),datetime(2020,9,8, hour = 20)],
-                 # # [datetime(2020,9,22, hour = 8),datetime(2020,9,22, hour = 17)],
-                 # # [datetime(2020,9,29, hour = 9),datetime(2020,9,29, hour = 16)],
-                 # # [datetime(2020,10,6, hour = 8),datetime(2020,10,7, hour = 15)],
-                # # ]
-    # # for rang in del_times:
-        # # if  rang[0] < pt_time < rang[1]:
-            # # return False
-    # # return True
+    del_times = [[datetime(2020,7,29, hour = 12),datetime(2020,7,29, hour = 19)],
+                 [datetime(2020,9,8, hour = 10),datetime(2020,9,8, hour = 20)],
+                 [datetime(2020,9,22, hour = 8),datetime(2020,9,22, hour = 17)],
+                 [datetime(2020,9,29, hour = 9),datetime(2020,9,29, hour = 16)],
+                 [datetime(2020,10,6, hour = 8),datetime(2020,10,7, hour = 15)],
+                ]
+    for rang in del_times:
+        if  rang[0] < pt_time < rang[1]:
+            return False
+    return True
     
     
-# # points = [pt for pt in points if no_data_rem(pt)]    
+points = [pt for pt in points if no_data_rem(pt)]    
 
 
 
@@ -47,7 +53,7 @@ if False:
     for _ in range(4000,5500,5):
         pt = points[_]
 
-        psd = rpsd('PSD010.csv')
+        psd = rpsd(psdfp)
 
         if pt.get_fft()[0] == None:
                continue
@@ -107,12 +113,14 @@ ax = fig.add_subplot(gs[0, :])
 coax = fig.add_subplot(gs[1, :])
 cocoax = fig.add_subplot(gs[2, :])
 
-points = [pt for pt in points if (pt.cannym(rpsd('PSD010.csv'))[0] != 0)]
-points = [pt for pt in points if not(pt.cannym(rpsd('PSD010.csv'))[0] > 250 and pt.cannym(rpsd('PSD010.csv'))[2] < 3)]
+t1 = time.perf_counter()
+
+points = [pt for pt in points if (pt.cannym(rpsd(psdfp))[0] != 0)]
+points = [pt for pt in points if not(pt.cannym(rpsd(psdfp))[0] > 250 and pt.cannym(rpsd(psdfp))[2] < 3)]
 # points = [pt for pt in points if pt.algoM()[0] > 300]
 
 def get_pwr(pt):
-    return pt.cannym(rpsd('PSD010.csv'))[2]
+    return pt.cannym(rpsd(psdfp))[2]
 
 points.sort(key = get_pwr)
 
@@ -122,11 +130,14 @@ dv = [1000*x.get_hach_depth() for x in points]
 bv = [x.get_vem() for x in points]    
 bsv = [x.get_ves() for x in points]  
 bav = [x.get_vea() for x in points]      
-tvd = [x.cannym(rpsd('PSD010.csv')) for x in points]
+tvd = [x.cannym(rpsd(psdfp)) for x in points]
 av = [x[0] for x in tvd]
 sv = [x[1] for x in tvd]
 powr = [x[2] for x in tvd]
 
+
+t2 = time.perf_counter()
+print(t2-t1)
 
 mpowr = 1.7*np.mean(powr)
 powr = [(math.exp(x)/math.exp(mpowr))**0.3 if x < mpowr else 1 for x in powr]
@@ -147,8 +158,8 @@ cocopc = cocoax.scatter(tv,dv, c = '#5802e340', s = 2)
 
 #coaxv.scatter(tv,dv, c = '#5802e340', s = 1)
 
-dstart = datetime(2020,11,22)
-dend = datetime(2020,11,25)
+dstart = min(tv)#datetime(2020,11,22)
+dend = max(tv)#datetime(2020,11,25)
 ax.set_xlim(dstart,dend)
 coax.set_xlim(dstart,dend)
 cocoax.set_xlim(dstart,dend)
@@ -263,7 +274,7 @@ plt.show()
 
 
 
-export_points(points, 'PSD010.csv', 'oldjoes.csv')
+########################export_points(points, 'PSD010.csv', 'oldjoes.csv')
 
 
 
