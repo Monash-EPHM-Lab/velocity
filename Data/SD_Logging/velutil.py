@@ -155,19 +155,20 @@ class SdPoint:
             indx_low = 3
             indx_high = 64
             if self.fft[0] == None:
-               return 0, 0, 0 , 0
+               return 0, 0, 0, 0, 0, 0, 0
             
             max_bin = 0
             #whiten noise
+
             fftpsd = [binn/weight for binn,weight in zip(self.fft, psd)]
             #fftpsd = [binn for binn in self.fft]
 
             #gausian #for the ATmega implenetation we should probably take the difference of the two logs for the PSD 
             fftpsd = [math.log(x) for x in fftpsd]
-            fftpsd = gf(fftpsd, sigma = 2)
+
+            fftpsd = gf(fftpsd, sigma = 2, mode = 'constant')
             
             ret_fftpsd = fftpsd.copy()
-            
             #sobel derivative
             #sob = [-1, 0 ,1]
             sob = [-1, 0 ,1]
@@ -176,14 +177,13 @@ class SdPoint:
             dfft = []
             
             
-            
             for i in range(len(fftpsd)):
                 try:
+
                     val = sum([x*y for x,y in zip(sob,fftpsd[i-1:i+2])])
                 except IndexError:
                     val = 0
                 dfft.append(val)
-            
 
             ctlow = self.ctlow
             ctinc = -1
@@ -224,13 +224,16 @@ class SdPoint:
                 
            
             max_val = dfft[max_bin]
-            
+
             mean_indx = 0
             std_indx = 0
      
             rdfft = dfft.copy()
             #remove negative
             dfft = [(0 if (x > 0.2*max_val) else x) for x in dfft]
+            
+            
+
             
             def getelt(i):
                 try:
@@ -738,79 +741,30 @@ def load_data(points, device,sp_st,sp_ed):
 
 
 
-def load_test(points,device,sp_st,sp_ed):
-
-    hach_date = []
-    hach_depth = []
-    hach_vel = []
-    
-    hach_files = ['data/hach/' + f for f in listdir('data/hach') if isfile(join('data/hach', f))]
-    log_files = ['data/log_' + device + '/' + f for f in listdir('data/log_' + device) if isfile(join('data/log_' + device, f))]
-    sd_files = ['data/sd_'  + device + '/' + f for f in listdir('data/sd_' + device) if isfile(join('data/sd_' + device, f))]\
-    
-
-    hach_nums = [int(x[15:17]) for x in hach_files]
-    log_nums = [int(x[17:19]) for x in log_files]
-    sd_nums = [int(x[15:17]) for x in sd_files]
-
-    max_wk = max( hach_nums + log_nums + sd_nums)+1
-    print(max_wk)
-    
-    hach_fl = [0]*max_wk
-    log_fl = [0]*max_wk
-    sd_fl = [0]*max_wk
-    
-    for i in range(max_wk):
-        try:
-            if (i == hach_nums[0]):
-                hach_fl[i] = hach_files[0]
-                hach_files.pop(0)
-                hach_nums.pop(0)
-        except IndexError:
-            pass
-        try:
-            if (i == log_nums[0]):
-                log_fl[i] = log_files[0]
-                log_files.pop(0)
-                log_nums.pop(0)
-        except IndexError:
-            pass
-        try:
-            if (i == sd_nums[0]):
-                sd_fl[i] = sd_files[0]
-                sd_files.pop(0)
-                sd_nums.pop(0)
-        except IndexError:
-            pass
-
-    
-    weeks = list(zip(hach_fl, log_fl, sd_fl))[sp_st:sp_ed]
-    
-    [print(x) for x in weeks]
-    for hach_f,log_f,sd_f in weeks:
-        with open(sd_f, newline='') as csvfile:
-                    spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
-                    for i,row in enumerate(spamreader):
-                                
-                            try:
-                                    idsd = float(row[0])
-                                    vemsd = float(row[136])
-                                    vessd = float(row[137])
-                                    veasd = float(row[138])
-                            except IndexError:
-                                    continue
+def load_test(points):
+    with open('FFT.csv', newline='') as csvfile:
+                spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+                for i,row in enumerate(spamreader):
                             
-                            point = SdPoint()
-                            
-                            point.set_vem(vemsd)
-                            point.set_ves(vessd)
-                            point.set_vea(veasd)
+                        try:
+                                idsd = float(row[0])
+                                vemsd = float(row[136])
+                                vessd = float(row[137])
+                                veasd = float(row[138])
+                        except IndexError:
+                                continue
+                        
+                        point = SdPoint()
+                        
+                        point.set_vem(vemsd)
+                        point.set_ves(vessd)
+                        point.set_vea(veasd)
 
-                            for j in range(128):
-                                    point.set_fft(float(row[j+3]),j)
-                            point.set_scale(float(row[132]))
-                            
-                            points.append(point)
+                        for j in range(128):
+                                point.set_fft(float(row[j+3]),j)
+                        point.set_scale(float(row[132]))
+                        
+                        points.append(point)
     return points
     
 def export_points(points, psd ,fp):

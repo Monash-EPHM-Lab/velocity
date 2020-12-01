@@ -215,63 +215,8 @@ axv.plot([0,2000],[0,2000], c = 'r')
 ##plt.savefig('vel_corr.png', dpi = 600)
 plt.show()
 
-#plt.savefig('time_depth.png', dpi = 600)
 # plt.cla()
                    
-
-
-
-# for _ in range(6800,7300,4):
-    # pt = points[_]
-
-    # psd = rpsd('5k6_wtr_wait.csv')
-
-    # if pt.get_fft()[0] == None:
-           # #print(_)
-           # continue
-
-    # hach_vem = pt.get_hach_vel()   
-   
-    # vels = [SdPoint.binconv * i for i in range(128)]
-
-    # plfft = pt.get_fft()
-    # psdfft = [x for x in plfft]
-    # psdfft = [binn/(weight) for binn,weight in zip(plfft, psd)]
-    # psdfft = gf(psdfft, 1)
-    # psdfft = [x for x in psdfft]
-
-
-
-    # alvem, alves, alvea = pt.algoM(psd)
-
-
-    # ax.plot(vels, plfft, label = 'raw fft')
-    
-
-    # ax.plot(vels, psdfft, label = 'whitened fft')
-    
-
-    # ax.vlines(hach_vem, 0 , 1E12, label = 'hach vel')
-    
-    # ax.vlines(alvem, 0 , 1E12, colors = "r", label = 'bosl fft')
-
-
-    # thresholds = [pt.thrsh for i,p in enumerate(psd)]
-    # ax.plot(vels, thresholds, label = 'thresholds')
-
-    # ax.set_xlim(0,64*SdPoint.binconv)
-    # ax.set_ylim(10,25000000)
-
-    # ax.set_title(str(pt.get_time()) +"  |   " + str(pt.get_id()))
-    # ax.set_xlabel("Velocity (mm/s)")
-    # ax.set_yscale('symlog')
-    # ax.set_ylabel("Amplitude")
-    # ax.legend(loc = 'upper right')
-    # plt.savefig('out\\' + str(_) + '.png', dpi = 300)
-
-    
-    # ax.clear()
-
 
 
 ########################export_points(points, 'PSD010.csv', 'oldjoes.csv')

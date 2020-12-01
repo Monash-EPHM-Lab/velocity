@@ -1,5 +1,5 @@
 /*
-BoSL Velocity Firmware rev: 0.1.5
+BoSL Velocity Firmware rev: 0.2.0
 PSD Spectrum for hardware ID xxx								
 */
 
@@ -7,16 +7,18 @@ PSD Spectrum for hardware ID xxx
 #include "src\arduinoFFTfix.h"
 #include "src\I2C.h"
 #include <LowPower.h>
+#include <math.h>
 
 #define SCAN 8
-#define THRESHOLD 8000
+#define THRESHOLD_SLOPE -0.35
+#define THRESHOLD_AREA -1
 #define SAMPLES 256
 #define ADCADR 0x34
 #define INTPIN 2
 
 ////arrays and constants 
 const float calArray[5] PROGMEM = {1, 9.72, 19.7, 35.7, 69.7}; //fft bin to frequency (Hz)
-const float convgd[5] PROGMEM = {-0.242, -0.3449, 0, 0.3449, 0.242}; //convlution which takes derivative and gausian blur (sigma = 1)
+const float convgd[7] PROGMEM = { -0.094, -0.111, -0.078, 0, 0.0780, 0.111, 0.094 }; //convlution which takes derivative and gausian blur (sigma = 2)
 //psd inverse to multiply ACC with
 #if SCAN != 8
 	#error PSD will be wrong if scans is not 8, need to change psd.
@@ -37,13 +39,12 @@ const float psd[128] PROGMEM = {0.0486, 0.0515, 0.1005, 0.1684, 0.2097, 0.2548, 
 int16_t read[SAMPLES];
 float acc[SAMPLES/2];
 
-float convstack[3];
+float convstack[5];
 
 float rangeScaler;
 
 
 float vem; //velocity measurement mean
-float ves; //velocity standard deviation
 float vea; //velocity amplitude score
 
 
@@ -121,14 +122,13 @@ void getVel(int velMulti, int scans, bool plot = 0) {
 
    maxPeak(velMulti);
    
-// returns in vem, ves, vea
+// returns in vem, vea
 }
 
 void setup() {
 
   Serial.begin(9600);
   Serial.print('R');
-  
 }
 
 
@@ -176,7 +176,7 @@ void printRes(){
 	Serial.print(",");
     Serial.print(vem, 0);
 	Serial.print(",");
-    Serial.print(ves, 0);
+    Serial.print("NA");
 	Serial.print(",");
     Serial.print(vea, 0);
 	Serial.print("T");
@@ -220,49 +220,73 @@ void getFFT(bool fft){
 
 void maxPeak(int velMulti){
 	
+	#define IDX_LOW 3
+	#define IDX_HIGH 64
+	
 	vem = 0;
-	ves = 0;
 	vea = 0;
 	
 	int max_bin = 0;
 
 
-	//whiten noise
-	whiten();
+	
+	for (int i = 0; i < (SAMPLES/4+5); i++){ //+5 for later convolution
+		acc[i] = log(acc[i]);
+	}
+	//log whiten noise
+	whitenLog();
 	
 	
-	//find maximum bin and maximum value
-	for (int i = 3; i < (SAMPLES / 4); i++)
-    {
-      if (acc[i] > vea) {
-        vea = acc[i];
-        max_bin = i;
-      }
-
-    }
+	doConv();
 	
-	//this find a peak outside the low noise range if present
-	//maybe this is a bad idea, should be safe to comment out if so
-	if (max_bin < 8){
-		float max_val = THRESHOLD;
-		for (int i = 8; i < 16; i++)
-		{
-		if (acc[i] > max_val) {
-			max_val = acc[i];
-			max_bin = i;
-			vea = max_val;
-		}
+	bool peakCan = false;
+	bool firstZero = true;
+	int lstZero = SAMPLES/4;
+	float norm = 0;
+	for(int i = SAMPLES/4 - 1; i >= 0; i--){
+		if (not peakCan){
+			if (acc[i] > 0){
+				lstZero = i;
+				norm = 0;
+			}else{
+				norm += acc[i];
+			}
+			
+			if (acc[i] > THRESHOLD_SLOPE){
+				max_bin = i;
+			}else if (acc[i] < acc[i-1]){
+				max_bin = i;
+				peakCan = true;
+			}
+			
+		}else{
+			norm += acc[i];
+			if (firstZero){
+				if (acc[i] > 0){
+					firstZero = false;
+				}
+			}else{
+				if (acc[i] < 0){
+					if (norm < THRESHOLD_AREA){
+						break;
+					}else{
+						peakCan = false;
+						firstZero = true;
+						lstZero = i;
+						norm = 0;
+					}
+				}
+			}
+		}	
+	}
+	
+	for(int i = 0; i < SAMPLES/4; i++){
+		if (acc[i] < 0){
+			acc[i] = 0;
 		}
 	}
 	
-    for (int i = 3; i < (SAMPLES / 4); i++) {
-      if (acc[i] < THRESHOLD) {
-        acc[i] = 0;
-      }
-
-    }
-
-    bool notPeak = 0;
+	bool notPeak = 0;
     for (int i = max_bin; i < (SAMPLES / 4); i++) {
       if (acc[i] == 0) {
         notPeak = 1;
@@ -280,8 +304,8 @@ void maxPeak(int velMulti){
         acc[i] = 0;
       }
     }
-
-	float norm = 0;
+	
+	norm = 0;
 
     for (int i = 3; i < (SAMPLES / 4) ; i++) {
       vem += (float)acc[i] * (float)i;
@@ -291,17 +315,9 @@ void maxPeak(int velMulti){
     vem = vem / norm;
 
 
-    for (int i = 3; i < (SAMPLES / 4); i++) {
-      ves += ((float)(i - vem))*((float)(i - vem))*((float)acc[i]);
-    }
-	
-	ves = sqrt(ves / norm);
-
-
     //converts frequency to mm/s
-    ves = 1.15*(ves) * (pgm_read_float_near(&calArray[velMulti]))*0.75  /(SAMPLES / 128);
     vem = 1.15*(vem) * (pgm_read_float_near(&calArray[velMulti]))*0.75  /(SAMPLES / 128); 
-	//vea = norm/1E3;//return vea as max amplitude
+	vea = norm;//return vea as max signal strength
 
 }
 
@@ -340,18 +356,24 @@ void whiten(){
 	}	
 }
 
+void whitenLog(){
+	for(int i = 0; i < SAMPLES/4+5 ; i++){ //+5 for later convolution
+		acc[i] = acc[i] - pgm_read_float_near(&psd[i]);
+	}	
+}
+
 void stackSet(){
-	for(int i =0; i < 4; i++){
+	for(int i =0; i < 5; i++){
 	convstack[i] = 0;
 	}
 }
 
 float stackPush(float val){
 	float popped = convstack[0];
-	for(int i =1; i < 3; i++){
+	for(int i =1; i < 5; i++){
 	convstack[i] = convstack[i-1];
 	}
-	convstack[2] = val;
+	convstack[4] = val;
 	return popped;
 }
 
@@ -462,7 +484,7 @@ void delDCcomp() {
 
 void getInf(){
 	Serial.println(F("ID: 00x"));
-	Serial.println(F("Firmware rev: 0.1.5"));
+	Serial.println(F("Firmware rev: 0.2.0"));
 	Serial.println(F("Hardware rev: 0.1.3"));
 }
 

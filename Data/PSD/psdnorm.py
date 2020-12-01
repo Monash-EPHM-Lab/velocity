@@ -7,9 +7,16 @@ print("VEL PSD ARDUINO")
 print()
 for i in range (8):
     for j in range(16):
-        print("{:.4f}".format(psd_norm[16*i+j]),end = ', ')
+        print("{:.4f}".format(psd[16*i+j]),end = ', ')
     print()
 
+print()
+print("VEL PSD ARDUINO")
+for i in range (8):
+    for j in range(16):
+        print("{:.4f}".format(psd_norm[16*i+j]**-1),end = ', ')
+    print()
+    
 print()
 print("VEL PSD ARDUINO")
 for i in range (8):
