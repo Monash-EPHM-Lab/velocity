@@ -18,28 +18,28 @@ PSD Spectrum for hardware ID xxx
 
 ////arrays and constants 
 const float calArray[5] PROGMEM = {1, 9.72, 19.7, 35.7, 69.7}; //fft bin to frequency (Hz)
-const float convgd[7] PROGMEM = { -0.094, -0.111, -0.078, 0, 0.0780, 0.111, 0.094 }; //convlution which takes derivative and gausian blur (sigma = 2)
+const float convgd[9] PROGMEM = {0.056, 0.094, 0.111, 0.078, 0, -0.0780, -0.111, -0.094, -0.056}; //convlution which takes derivative and gausian blur (sigma = 2)
 //psd inverse to multiply ACC with
 #if SCAN != 8
 	#error PSD will be wrong if scans is not 8, need to change psd.
 #endif
 
-//this psd has been normalised to have a sum of 128 and then the reciprocal was taken to optimise division 
-const float psd[128] PROGMEM = {0.0486, 0.0515, 0.1005, 0.1684, 0.2097, 0.2548, 0.2918, 0.2941, 0.3260, 0.3872, 0.4247, 0.4557, 0.5112, 0.5283, 0.5929, 0.6724,
-								0.7019, 0.7564, 0.7914, 0.8685, 1.0031, 1.1231, 1.1873, 1.3456, 1.4145, 1.5398, 1.7043, 1.6475, 1.8733, 2.1320, 2.1425, 2.3349,
-								2.4325, 2.6274, 2.7041, 2.7515, 2.8640, 2.8970, 2.8848, 2.8773, 2.9352, 2.9080, 2.9468, 2.9932, 3.0037, 3.0858, 3.1253, 2.9065,
-								2.7438, 2.6662, 2.6206, 2.4676, 2.2633, 2.4108, 2.7908, 3.1709, 3.1852, 3.2739, 3.5544, 3.6771, 3.6985, 3.8011, 3.8440, 3.8430,
-								3.8374, 3.8902, 3.9454, 3.9505, 4.0462, 4.1509, 4.1788, 4.2397, 4.0877, 4.1413, 4.3790, 4.3199, 4.1033, 4.0549, 3.8106, 3.4437,
-								3.1874, 3.0327, 2.6496, 2.8251, 3.2223, 3.6684, 3.8046, 3.7911, 3.9244, 4.1388, 4.1237, 4.1424, 4.1158, 4.3081, 4.3293, 4.3082,
-								4.2095, 4.3283, 4.4344, 4.4344, 4.4511, 4.5481, 4.4713, 4.4890, 4.4620, 4.5747, 4.5343, 4.5284, 4.5218, 4.3216, 4.4784, 4.4617,
-								4.5578, 4.7484, 4.6178, 4.5849, 4.5438, 4.7071, 4.7038, 4.6925, 4.5123, 4.5673, 4.7224, 4.7807, 4.6650, 4.6258, 4.7032, 4.6332};
+//this psd has been normalised to have a sum of 128 and then the log was taken to optimise division 
+const float psd[128] PROGMEM = {1.7025,2.8384,2.667,2.3104,2.0386,1.817,1.6309,1.4694,1.3649,1.25,1.1571,1.0574,1.0068,0.9056,0.8216,0.7779,
+								0.723,0.635,0.5665,0.506,0.4527,0.3852,0.3417,0.2717,0.2461,0.1822,0.1304,0.0594,0.0621,-0.036,-0.1163,-0.1745,
+								-0.2055,-0.2748,-0.3405,-0.4152,-0.4505,-0.4997,-0.5583,-0.6129,-0.6708,-0.7386,-0.8072,-0.8576,-0.9116,-0.9838,-1.0504,-1.0984,
+								-1.1451,-1.231,-1.3071,-1.372,-1.4313,-1.5146,-1.5847,-1.6497,-1.7043,-1.797,-1.8682,-1.9366,-2.0212,-2.1136,-2.1768,-2.2614,
+								-2.331,-2.4236,-2.5108,-2.6269,-2.6824,-2.7742,-2.8665,-2.972,-3.0449,-3.1653,-3.2781,-3.3992,-3.4868,-3.6119,-3.7214,-3.8351,
+								-3.9477,-4.0923,-4.2064,-4.3351,-4.4654,-4.6152,-4.7444,-4.8665,-4.9762,-5.0995,-5.2214,-5.3602,-5.4262,-5.4968,-5.5468,-5.5994,
+								-5.5994,-5.5994,-5.5728,-5.5468,-5.4727,-5.4491,-5.4037,-5.3185,-5.2591,-5.203,-5.116,-5.036,-5.0056,-4.9477,-4.8929,-4.8283,
+								-4.7795,-4.7444,-4.6886,-4.6565,-4.6356,-4.6152,-4.5854,-4.5756,-4.5282,-4.5099,-4.5099,-4.483,-4.4654,-4.4568,-4.4397,-4.4568};
 
 
 //FFT sample buffers
 int16_t read[SAMPLES];
 float acc[SAMPLES/2];
 
-float convstack[5];
+float convstack[8];
 
 float rangeScaler;
 
@@ -230,7 +230,7 @@ void maxPeak(int velMulti){
 
 
 	
-	for (int i = 0; i < (SAMPLES/4+5); i++){ //+5 for later convolution
+	for (int i = 0; i < (SAMPLES/4 +7); i++){ //+7 for later convolution
 		acc[i] = log(acc[i]);
 	}
 	//log whiten noise
@@ -281,7 +281,7 @@ void maxPeak(int velMulti){
 	}
 	
 	for(int i = 0; i < SAMPLES/4; i++){
-		if (acc[i] < 0){
+		if (acc[i] > 0){
 			acc[i] = 0;
 		}
 	}
@@ -316,24 +316,24 @@ void maxPeak(int velMulti){
 
 
     //converts frequency to mm/s
-    vem = 1.15*(vem) * (pgm_read_float_near(&calArray[velMulti]))*0.75  /(SAMPLES / 128); 
-	vea = norm;//return vea as max signal strength
+    vem = 0.6*1.15*(vem) * (pgm_read_float_near(&calArray[velMulti]))*0.75  /(SAMPLES / 128); 
+	vea = -norm;//return vea as max signal strength
 
 }
 
 
 void doConv(){
 	stackSet();
-	for(int i = 0; i< SAMPLES/4; i++){
+	for(int i = 0; i< SAMPLES/4 + 7; i++){
 		float sum = 0;
 		float pop = 0;
-		for(int j = 0; j < 5; j++){
-			sum += pgm_read_float_near(&convgd[j])*getAcc(i-j);
+		for(int j = 0; j < 9; j++){
+			sum += pgm_read_float_near(&convgd[j])*getAcc(i-j+4);
 		}
 		pop = stackPush(sum);
 		setAcc(i-4, pop);
 	}
-	
+	setAcc(0, 0);
 }
 
 float getAcc(int idx){
@@ -357,23 +357,23 @@ void whiten(){
 }
 
 void whitenLog(){
-	for(int i = 0; i < SAMPLES/4+5 ; i++){ //+5 for later convolution
+	for(int i = 0; i < SAMPLES/4 +7 ; i++){ //+7 for later convolution
 		acc[i] = acc[i] - pgm_read_float_near(&psd[i]);
 	}	
 }
 
 void stackSet(){
-	for(int i =0; i < 5; i++){
+	for(int i =0; i < 8; i++){
 	convstack[i] = 0;
 	}
 }
 
 float stackPush(float val){
 	float popped = convstack[0];
-	for(int i =1; i < 5; i++){
-	convstack[i] = convstack[i-1];
+	for(int i = 0; i < 8; i++){
+	convstack[i] = convstack[i+1];
 	}
-	convstack[4] = val;
+	convstack[3] = val;
 	return popped;
 }
 
